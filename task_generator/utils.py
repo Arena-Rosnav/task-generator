@@ -1,7 +1,6 @@
 import rospy
 import os
 
-
 class Utils:
     def print_divider_with_text(text):
         rospy.loginfo("".join(["="] * 80))
@@ -10,3 +9,4 @@ class Utils:
 
     def get_environment():
         return os.getenv("ENVIRONMENT", "flatland").lower()
+

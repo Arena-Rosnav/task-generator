@@ -1,45 +1,35 @@
 import rospy
-from task_generator.constants import TaskMode 
+from nav_msgs.srv import GetMap
 
+from task_generator.environments.environment_factory import EnvironmentFactory
+from task_generator.environments.gazebo_environment import GazeboEnvironment
+from task_generator.environments.flatland_environment import FlatlandRandomModel
+from task_generator.manager.map_manager import MapManager
+from task_generator.manager.obstacle_manager import ObstacleManager
+from task_generator.manager.robot_manager import RobotManager
+from task_generator.tasks.task_factory import TaskFactory
+from task_generator.tasks.manual import ManualTask
+from task_generator.tasks.random import RandomTask
+from task_generator.tasks.scenario import ScenarioTask
+from task_generator.tasks.staged import StagedRandomTask
+from task_generator.utils import Utils
 
-def get_predefined_task(ns, mode="random", PATHS=None, *args) -> None:
-    # type: (str, str, int, dict) -> None
+def get_predefined_task(namespace, mode, environment, **args):
+    # get the map
+    rospy.wait_for_service("/static_map")
+    service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
+    map_response = service_client_get_map()
 
-    get_static_map_srv = rospy.ServiceProxy("/static_map", GetMap)
-    static_map = get_static_map_srv()
+    map_manager = MapManager(map_response.map)
 
-    robot_manager = RobotManager(ns="", map_=static_map.map)
-    obstacle_manager = ObstaclesManager(ns="", map_=static_map.map)
-    pedsim_manager = PedsimManager()
+    robot_manager = RobotManager(namespace, map_manager, environment)
+    obstacle_manager = ObstacleManager(namespace, map_manager, environment)
 
-    assert mode in [TaskMode.STAGED, TaskMode.SCENARIO, TaskMode.MANUAL, TaskMode.RANDOM], f"Mode '{mode}' not supported"
-
-    # Tasks will be moved to other classes or functions.
-    task = None
-    if mode == "random":
-        forbidden_zones = obstacle_manager.register_random_static_obstacles(
-            N_OBS["static"]
-        )
-        # forbidden_zones = obstacle_manager.register_random_dynamic_obstacles(
-        #     N_OBS["dynamic"], forbidden_zones=forbidden_zones
-        # )
-        task = RandomTask(pedsim_manager, obstacle_manager, robot_manager)
-        print("random tasks requested")
-    if mode == "staged":
-        task = StagedTask(
-            ns, pedsim_manager, obstacle_manager, robot_manager, PATHS, *args
-        )
-
-    if mode == "scenario":
-        # forbidden_zones = obstacle_manager.register_random_static_obstacles(
-        #     N_OBS["static"]
-        # )
-        task = ScenarioTask(
-            pedsim_manager, obstacle_manager, robot_manager, PATHS["scenario"]
-        )
-
-    if mode == "manual":
-        task = ManualTask(pedsim_manager, obstacle_manager, robot_manager)
+    task = TaskFactory.instantiate(mode, obstacle_manager, robot_manager, map_manager, namespace=namespace, **args)
 
     return task
 
+def get_predefined_task_outside(namespace, mode, start_stage, paths):
+    environment = EnvironmentFactory.instantiate(Utils.get_environment())(namespace)
+
+    return get_predefined_task(namespace, mode, environment, start_stage=start_stage, paths=paths)

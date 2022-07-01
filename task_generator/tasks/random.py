@@ -1,0 +1,47 @@
+import random
+
+from task_generator.constants import TaskMode
+from task_generator.tasks.task_factory import TaskFactory
+
+from .base_task import BaseTask
+
+
+@TaskFactory.register(TaskMode.RANDOM)
+class RandomTask(BaseTask):
+    def reset(self, start=None, goal=None):
+        return super().reset(lambda: self._reset_robot_and_obstacles(start, goal))
+
+    def _reset_robot_and_obstacles(
+            self, start=None, goal=None, dynamic_obstacles=None, static_obstacles=None
+        ):
+        start_pos, goal_pos = self.robot_manager.reset(start_pos=start, goal_pos=goal)
+
+        print(start_pos, goal_pos, start, goal)
+
+        dynamic_obstacles = random.randint(
+            TaskMode.Random.MIN_DYNAMIC_OBS, 
+            TaskMode.Random.MAX_DYNAMIC_OBS
+        ) if dynamic_obstacles == None else dynamic_obstacles
+        static_obstacles = random.randint(
+            TaskMode.Random.MIN_STATIC_OBS,
+            TaskMode.Random.MAX_STATIC_OBS
+        ) if static_obstacles == None else static_obstacles
+
+        self.obstacles_manager.reset_random(
+            dynamic_obstacles=dynamic_obstacles,
+            static_obstacles=static_obstacles,
+            forbidden_zones=[
+                (
+                    start_pos[0],
+                    start_pos[1],
+                    self.robot_manager.robot_radius,
+                ),
+                (
+                    goal_pos[0],
+                    goal_pos[1],
+                    self.robot_manager.robot_radius,
+                ),
+            ]
+        )
+
+        return False, goal_pos

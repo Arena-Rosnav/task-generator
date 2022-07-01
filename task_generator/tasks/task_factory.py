@@ -15,11 +15,11 @@ class TaskFactory:
         return inner_wrapper
 
     @classmethod
-    def instantiate(cls, name: str, *kwargs):
+    def instantiate(cls, name: str, *args, **kwargs):
         assert name in cls.registry, f"Environment '{name}' is not registered!"
         environment = cls.registry[name]
         
         if issubclass(environment, BaseTask):
-            return environment(*kwargs)
+            return environment(*args, **kwargs)
         else:
             return environment

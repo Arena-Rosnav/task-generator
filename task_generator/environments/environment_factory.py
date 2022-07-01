@@ -15,11 +15,9 @@ class EnvironmentFactory:
         return inner_wrapper
 
     @classmethod
-    def instantiate(cls, name: str, *kwargs):
+    def instantiate(cls, name: str):
         assert name in cls.registry, f"Environment '{name}' is not registered!"
+
         environment = cls.registry[name]
         
-        if issubclass(environment, BaseEnvironment):
-            return environment(*kwargs)
-        else:
-            return environment
+        return environment

@@ -7,7 +7,7 @@ from .base_environment import BaseEnvironment
 
 @EnvironmentFactory.register("gazebo")
 class GazeboEnvironment(BaseEnvironment):
-    def __init__(self):
+    def __init__(self, namespace):
         super().__init__()
 
         self.unpause = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
@@ -18,3 +18,21 @@ class GazeboEnvironment(BaseEnvironment):
 
     def after_reset_task(self):
         self.unpause()
+
+    def remove_all_obstacles(self):
+        raise NotImplementedError()
+
+    def spawn_random_dynamic_obstacle(self):
+        raise NotImplementedError()
+
+    def spawn_random_static_obstacles(self):
+        raise NotImplementedError()
+
+    def publish_goal(self, goal):
+        raise NotImplementedError()
+
+    def move_robot(self, pos):
+        raise NotImplementedError()
+
+    def spawn_robot(self):
+        raise NotImplementedError()
