@@ -14,7 +14,7 @@ from task_generator.tasks.scenario import ScenarioTask
 from task_generator.tasks.staged import StagedRandomTask
 from task_generator.utils import Utils
 
-def get_predefined_task(namespace, mode, environment, **args):
+def get_predefined_task(namespace, mode, environment, **kwargs):
     # get the map
     rospy.wait_for_service("/static_map")
     service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
@@ -25,7 +25,7 @@ def get_predefined_task(namespace, mode, environment, **args):
     robot_manager = RobotManager(namespace, map_manager, environment)
     obstacle_manager = ObstacleManager(namespace, map_manager, environment)
 
-    task = TaskFactory.instantiate(mode, obstacle_manager, robot_manager, map_manager, namespace=namespace, **args)
+    task = TaskFactory.instantiate(mode, obstacle_manager, robot_manager, map_manager, namespace=namespace, **kwargs)
 
     return task
 

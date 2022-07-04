@@ -6,7 +6,7 @@ from task_generator.constants import Constants
 
 
 class BaseTask():
-    def __init__(self, obstacles_manager, robot_manager, map_manager):
+    def __init__(self, obstacles_manager, robot_manager, map_manager, *args, **kwargs):
         self.obstacles_manager = obstacles_manager
         self.robot_manager = robot_manager
         self.map_manager = map_manager

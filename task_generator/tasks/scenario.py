@@ -11,8 +11,9 @@ class ScenarioTask(BaseTask):
         obstacles_manager,
         robot_manager,
         scenario_file_path,
+        **kwargs
     ):
-        super().__init__(obstacles_manager, robot_manager)
+        super().__init__(obstacles_manager, robot_manager, **kwargs)
 
         # load scenario from file
         self.scenario = ArenaScenario()

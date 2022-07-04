@@ -24,7 +24,7 @@ class MapManager:
             Returns:
             x_in_meters,y_in_meters,theta
         """
-        print(self.free_space_indices)
+        print("SAFE DIST", safe_dist)
 
         assert len(self.free_space_indices) == 2 and len(self.free_space_indices[0]) == len(
             self.free_space_indices[1]), "free_space_indices is not correctly setup"

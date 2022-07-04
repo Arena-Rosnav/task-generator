@@ -1,6 +1,6 @@
 import random
 
-from task_generator.constants import TaskMode
+from task_generator.constants import Constants, TaskMode
 from task_generator.tasks.task_factory import TaskFactory
 
 from .base_task import BaseTask
@@ -15,8 +15,6 @@ class RandomTask(BaseTask):
             self, start=None, goal=None, dynamic_obstacles=None, static_obstacles=None
         ):
         start_pos, goal_pos = self.robot_manager.reset(start_pos=start, goal_pos=goal)
-
-        print(start_pos, goal_pos, start, goal)
 
         dynamic_obstacles = random.randint(
             TaskMode.Random.MIN_DYNAMIC_OBS, 
@@ -34,12 +32,12 @@ class RandomTask(BaseTask):
                 (
                     start_pos[0],
                     start_pos[1],
-                    self.robot_manager.robot_radius,
+                    self.robot_manager.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
                 ),
                 (
                     goal_pos[0],
                     goal_pos[1],
-                    self.robot_manager.robot_radius,
+                    self.robot_manager.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
                 ),
             ]
         )

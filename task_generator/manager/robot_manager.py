@@ -28,8 +28,6 @@ class RobotManager:
         return start, goal
 
     def generate_new_start_and_goal(self, forbidden_zones, start_pos, goal_pos):
-        print(start_pos, goal_pos)
-
         self.start_pos = self._default_position(
             start_pos,
             self.map_manager.get_random_pos_on_map(
@@ -41,7 +39,7 @@ class RobotManager:
         self.goal_pos = self._default_position(
             goal_pos,
             self.map_manager.get_random_pos_on_map(
-                self.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST, 
+                3 * self.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST, 
                 [
                     *forbidden_zones,
                     (

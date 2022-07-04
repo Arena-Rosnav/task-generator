@@ -31,7 +31,7 @@ class FlatlandEnvironment(BaseEnvironment):
         self._goal_pub = rospy.Publisher(f"{self._ns_prefix}goal", PoseStamped, queue_size=1, latch=True)
         self._move_base_goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1, latch=True)
 
-        self._robot_name = rospy.get_param("robot_name")
+        self._robot_name = rospy.get_param("robot_model")
         self._robot_radius = rospy.get_param("robot_radius")
         self._is_training_mode = rospy.get_param("train_mode")
         self._step_size = rospy.get_param("step_size")
