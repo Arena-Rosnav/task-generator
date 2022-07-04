@@ -1,7 +1,6 @@
 #! /usr/bin/env python3
 
 import math
-import logging
 import rospy
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Int16, Bool
@@ -18,6 +17,7 @@ from task_generator.environments.gazebo_environment import GazeboEnvironment
 from task_generator.environments.flatland_environment import FlatlandRandomModel
 
 
+
 class TaskGenerator:
     """
         Task Generator Node
@@ -25,6 +25,8 @@ class TaskGenerator:
     """
 
     def __init__(self) -> None:
+
+
         ## Params
         self.task_mode = rospy.get_param("/task_mode")
         scenarios_json_path = rospy.get_param("~scenarios_json_path")
@@ -51,7 +53,7 @@ class TaskGenerator:
         ## Vars
         self.env_wrapper = EnvironmentFactory.instantiate(Utils.get_environment())("")
 
-        logging.info(f"Launching task mode: {self.task_mode}")
+        rospy.loginfo(f"Launching task mode: {self.task_mode}")
 
         paths = {"scenario_json_path": scenarios_json_path}
 
@@ -73,11 +75,11 @@ class TaskGenerator:
         should_reset_task = False
 
         if self._get_distance_to_goal() <= Constants.GOAL_REACHED_TOLERANCE:
-            logging.info("GOAL REACHED")
+            rospy.loginfo("GOAL REACHED")
             should_reset_task = True
 
         if rospy.get_time() > self.start_time + Constants.TIMEOUT:
-            logging.warning("TIMEOUT")
+            rospy.logwarn("TIMEOUT")
             should_reset_task = True
 
         if not self.auto_reset or not should_reset_task:
@@ -99,7 +101,9 @@ class TaskGenerator:
         self.pub_scenario_reset.publish(self.number_of_resets)
         self._send_end_message_when_is_end(is_end)
 
-        Utils.print_divider_with_text("TASK RESETED!")
+        rospy.loginfo("=============")
+        rospy.loginfo("Task Reseted!")
+        rospy.loginfo("=============")
 
         self.env_wrapper.after_reset_task()
 
@@ -117,7 +121,7 @@ class TaskGenerator:
         self.curr_goal_pos = [goal.x, goal.y, 0]
 
     def reset_task_srv_callback(self, req):
-        rospy.loginfo("Task Generator received task-reset request!")
+        rospy.logdebug("Task Generator received task-reset request!")
 
         self.reset_task()
 

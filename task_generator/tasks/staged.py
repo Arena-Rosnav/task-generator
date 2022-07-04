@@ -58,7 +58,7 @@ class StagedRandomTask(RandomTask):
 
     def next_stage(self):
         if self._curr_stage >= len(self._stages):
-            print(f"({self.namespace}) INFO: Tried to trigger next stage but already reached last one")
+            rospy.loginfo(f"({self.namespace}) INFO: Tried to trigger next stage but already reached last one")
 
         self._curr_stage = self._curr_stage + 1
         
@@ -66,7 +66,7 @@ class StagedRandomTask(RandomTask):
 
     def previous_stage(self):
         if self._curr_stage <= 1:
-            print(f"({self.namespace}) INFO: Tried to trigger previous stage but already reached first one")
+            rospy.loginfo(f"({self.namespace}) INFO: Tried to trigger previous stage but already reached first one")
 
         self._curr_stage = self._curr_stage - 1
         
@@ -120,7 +120,7 @@ class StagedRandomTask(RandomTask):
             dynamic_obstacles=dynamic_obstacles
         )
 
-        print(
+        rospy.loginfo(
             f"({self.namespace}) Stage {self._curr_stage}: Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!"
         )
 
