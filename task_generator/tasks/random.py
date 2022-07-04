@@ -8,6 +8,13 @@ from .base_task import BaseTask
 
 @TaskFactory.register(TaskMode.RANDOM)
 class RandomTask(BaseTask):
+    """
+        The random task spawns static and dynamic
+        obstacles on every reset and will create
+        a new robot start and goal position for
+        each task.
+    """
+
     def reset(self, start=None, goal=None):
         return super().reset(lambda: self._reset_robot_and_obstacles(start, goal))
 

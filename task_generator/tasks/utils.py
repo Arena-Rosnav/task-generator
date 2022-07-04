@@ -15,7 +15,9 @@ from task_generator.tasks.staged import StagedRandomTask
 from task_generator.utils import Utils
 
 def get_predefined_task(namespace, mode, environment, **kwargs):
-    # get the map
+    """
+        Gets the task based on the passed mode
+    """
     rospy.wait_for_service("/static_map")
     service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
     map_response = service_client_get_map()
@@ -30,6 +32,12 @@ def get_predefined_task(namespace, mode, environment, **kwargs):
     return task
 
 def get_predefined_task_outside(namespace, mode, start_stage, paths):
+    """
+        When a task should be used outside of the
+        task generator node, this function is used
+        to initialize the task manager with the
+        used environment (flatland, gazebo, ...)
+    """
     environment = EnvironmentFactory.instantiate(Utils.get_environment())(namespace)
 
     return get_predefined_task(namespace, mode, environment, start_stage=start_stage, paths=paths)

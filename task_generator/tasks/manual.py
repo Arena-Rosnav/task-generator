@@ -10,6 +10,16 @@ from task_generator.tasks.task_factory import TaskFactory
 
 @TaskFactory.register(TaskMode.MANUAL)
 class ManualTask(RandomTask):
+    """
+        Derives from the random task but has a subscriber set
+        up to listen on the "task_generator" topic.
+        New Goals defined in rviz are sent there and
+        will be set as next goal when received by the
+        manual task. 
+        Except this, the manual task behaves like a random
+        task.   
+    """
+
     def __init__(
         self,
         obstacles_manager,

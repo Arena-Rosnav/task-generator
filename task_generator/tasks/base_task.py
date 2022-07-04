@@ -6,6 +6,10 @@ from task_generator.constants import Constants
 
 
 class BaseTask():
+    """
+        Base Task as parent class for all other tasks.
+    """
+
     def __init__(self, obstacles_manager, robot_manager, map_manager, *args, **kwargs):
         self.obstacles_manager = obstacles_manager
         self.robot_manager = robot_manager
@@ -17,6 +21,12 @@ class BaseTask():
         rospy.Subscriber("/map", OccupancyGrid, self._update_map)
 
     def reset(self, callback):
+        """
+            Calls a passed reset function (usually the tasks own reset)
+            inside a loop so when the callback fails once it is tried
+            again. After MAX_RESET_FAIL_TIMES the reset is considered
+            as fail and the simulation is shut down.
+        """
         self._map_lock.acquire()
 
         fails = 0

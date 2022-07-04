@@ -12,6 +12,16 @@ from task_generator.tasks.random import RandomTask
 
 @TaskFactory.register(TaskMode.STAGED)
 class StagedRandomTask(RandomTask):
+    """
+        The staged task mode is designed for the trainings 
+        process of arena-rosnav. In general, it behaves 
+        like the random task mode but there are multiple 
+        stages between one can switch. Between the stages, 
+        the amount of static and dynamic obstacles changes. 
+        The amount of obstacles is defined in a curriculum 
+        file, the path to said file is a key in the `paths` 
+        parameter.
+    """
     def __init__(
         self,
         obstacles_manager,
@@ -76,6 +86,11 @@ class StagedRandomTask(RandomTask):
         return stage
 
     def _update_stage_in_hyperparams(self, stage):
+        """
+            The current stage is stored inside the hyperparams
+            file for when the training is stopped and later
+            continued, the correct stage can be restored.
+        """
         self._hyperparams_lock.acquire()
 
         file = open(self._hyperparams_file_path, "r")

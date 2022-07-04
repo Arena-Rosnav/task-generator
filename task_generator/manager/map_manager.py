@@ -6,6 +6,12 @@ from task_generator.constants import Constants
 
 
 class MapManager:
+    """
+        The map manager manages the static map
+        and is used to get new goal, robot and
+        obstacle positions.
+    """
+
     def __init__(self, map: OccupancyGrid):
         self.update_map(map)
 
@@ -16,16 +22,27 @@ class MapManager:
     
     def get_random_pos_on_map(self, safe_dist: float, forbidden_zones: list = None):
         """
-            Args:
-                indices_y_x(tuple): a 2 elementary tuple stores the indices of the non-occupied cells, the first element is the y-axis indices,
-                    the second element is the x-axis indices.
-                map (OccupancyGrid): map proviced by the ros map service
-                forbidden_zones (list of 3 elementary tuple(x,y,r)): a list of zones which is forbidden
-            Returns:
-            x_in_meters,y_in_meters,theta
-        """
-        print("SAFE DIST", safe_dist)
+            This function is used by the robot manager and 
+            obstacles manager to get new positions for both
+            robot and obstalces.
 
+            The function will choose a position at random
+            and then validate the position. If the position
+            is not valid a new position is chosen. When 
+            no valid position is found after 100 retries
+            an error is thrown.
+
+            Args:
+                safe_dist: minimal distance to the next 
+                    obstacles for calculated positons 
+                forbidden_zones: Array of (x, y, radius), 
+                    describing circles on the map. New
+                    position should not lie on forbidden
+                    zones e.g. the circles.
+
+            Returns:
+                A tuple with three elements: x, y, theta
+        """
         assert len(self.free_space_indices) == 2 and len(self.free_space_indices[0]) == len(
             self.free_space_indices[1]), "free_space_indices is not correctly setup"
 
@@ -49,8 +66,7 @@ class MapManager:
             n_check_failed += 1
 
         if n_check_failed >= 100:
-            raise Exception(
-                "cann't find any no-occupied space please check the map information")
+            raise Exception("can't find any non-occupied spaces")
 
         theta = random.uniform(-math.pi, math.pi)
 
@@ -70,12 +86,9 @@ class MapManager:
         return True
 
     def _check_static_map_dist(self, x, y, cell_radius):
-        # in pixel
         x_index = int((x - self.map.info.origin.position.x) // self.map.info.resolution)
         y_index = int((y - self.map.info.origin.position.y) // self.map.info.resolution)
 
-        # check occupancy around (x_index,y_index) with cell_radius
-        # TODO use numpy for checking
         for i in range(x_index - cell_radius, x_index + cell_radius, 1):
             for j in range(y_index - cell_radius, y_index + cell_radius, 1):
                 index = j * self.map.info.width + i
@@ -86,7 +99,6 @@ class MapManager:
         return True
 
     def _set_freespace_indices(self):
-        ## generate the indices(represented in a tuple) of the freespace based on the map
         width_in_cell, height_in_cell = self.map.info.width, self.map.info.height
 
         map_2d = np.reshape(self.map.data, (height_in_cell, width_in_cell))

@@ -3,6 +3,10 @@ from task_generator.constants import Constants
 
 
 class RobotManager:
+    """
+        The robot manager manages the goal and start 
+        position of a robot for all task modes.
+    """
 
     def __init__(self, namespace, map_manager, environment):
         self.namespace = namespace
@@ -13,13 +17,17 @@ class RobotManager:
         self.start_pos = None
         self.goal_pos = None
 
-        print(self.environment)
-
         self.environment.spawn_robot()
 
         self.robot_radius = rospy.get_param("robot_radius")
 
     def reset(self, forbidden_zones=[], start_pos=None, goal_pos=None):
+        """
+            The manager creates new start and goal position
+            when a task is reset, publishes the goal to
+            move base and rviz and moves the robot to
+            the start position.
+        """
         start, goal = self.generate_new_start_and_goal(forbidden_zones, start_pos, goal_pos)
 
         self.publish_goal()

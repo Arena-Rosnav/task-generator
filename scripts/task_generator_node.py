@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 
 import math
+import logging
 import rospy
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Int16, Bool
@@ -18,6 +19,10 @@ from task_generator.environments.flatland_environment import FlatlandRandomModel
 
 
 class TaskGenerator:
+    """
+        Task Generator Node
+        Will initialize and reset all tasks. The task to use is read from the `/task_mode` param.
+    """
 
     def __init__(self) -> None:
         ## Params
@@ -46,6 +51,8 @@ class TaskGenerator:
         ## Vars
         self.env_wrapper = EnvironmentFactory.instantiate(Utils.get_environment())("")
 
+        logging.info(f"Launching task mode: {self.task_mode}")
+
         paths = {"scenario_json_path": scenarios_json_path}
 
         self.start_time = rospy.get_time() 
@@ -66,11 +73,11 @@ class TaskGenerator:
         should_reset_task = False
 
         if self._get_distance_to_goal() <= Constants.GOAL_REACHED_TOLERANCE:
-            print("GOAL REACHED")
+            logging.info("GOAL REACHED")
             should_reset_task = True
 
         if rospy.get_time() > self.start_time + Constants.TIMEOUT:
-            print("TIMEOUT")
+            logging.warning("TIMEOUT")
             should_reset_task = True
 
         if not self.auto_reset or not should_reset_task:

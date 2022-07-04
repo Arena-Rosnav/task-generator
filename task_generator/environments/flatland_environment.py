@@ -23,6 +23,22 @@ from .environment_factory import EnvironmentFactory
 
 @EnvironmentFactory.register("flatland")
 class FlatlandEnvironment(BaseEnvironment):
+    """
+        This is the flatland encoder for connecting the
+        flatland environment with the arena-rosnav task
+        generator. The class implements all methods
+        defined in `BaseEnvironment`.
+
+        For flatland to work properly, a dedicated .yaml
+        file has to be created for each used model. This
+        is, because the spawn model request only contains
+        the path to this file instead of the file content
+        directly. For each reset a new set of obstacles 
+        is created and saved in files. The path to these
+        files is defined in the `tmp_model_path` param
+        and defaults to `/tmp`.
+    """
+
     def __init__(self, namespace):
         super().__init__(namespace)
         self._namespace = namespace
@@ -36,7 +52,7 @@ class FlatlandEnvironment(BaseEnvironment):
         self._is_training_mode = rospy.get_param("train_mode")
         self._step_size = rospy.get_param("step_size")
         self._robot_yaml_path = rospy.get_param("robot_yaml_path")
-        self._tmp_model_path = rospy.get_param("tmp_model_path")
+        self._tmp_model_path = rospy.get_param("tmp_model_path", "/tmp")
 
         rospy.wait_for_service(f"{self._ns_prefix}move_model", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
         rospy.wait_for_service(f"{self._ns_prefix}spawn_model", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
@@ -69,7 +85,6 @@ class FlatlandEnvironment(BaseEnvironment):
         self._delete_model_srv(delete_model_request)
 
     def spawn_random_dynamic_obstacle(self, **args):
-        print("ARGS", args)
         self._spawn_random_obstacle(**args, is_dynamic=True)
 
     def spawn_random_static_obstacle(self, **args):
@@ -137,7 +152,13 @@ class FlatlandEnvironment(BaseEnvironment):
             linear_vel=FlatlandRandomModel.LINEAR_VEL,
             angular_vel_max=FlatlandRandomModel.ANGLUAR_VEL_MAX
         ):
+        """
+            Creates a dict in the flatland model schema.
 
+            Since a lot of the variables are untouched
+            the majority of the dict is filled up with
+            constants defined in the `Constants` file.
+        """
         body = {
             **FlatlandRandomModel.BODY,
             "type": "dynamic" if is_dynamic else "static"
@@ -162,6 +183,23 @@ class FlatlandEnvironment(BaseEnvironment):
         return model
 
     def _generate_random_footprint_type(self, min_radius, max_radius):
+        """
+            An object in flatland can either be a circle with a 
+            specific radius or a polygon shape.
+
+            This function will choose a shape randomly and
+            creates a shape from this. 
+
+            For the circle the radius is chosen randomly and
+            lies in a specific range defined in the `constants` file
+
+            For the polygon, the amount of vertexes is determined
+            at first. Then the vertexes are distributed around the center
+            and for each vertex a distance to the center is calculated.
+            At the end, the vertexes form the polygon. The distance
+            to the center is chosen randomly and lies in the range
+            defined in `constants`. 
+        """
         type = random.choice(["circle", "polygon"])
 
         if type == "circle":
@@ -191,7 +229,6 @@ class FlatlandEnvironment(BaseEnvironment):
         }
 
     def _create_obstacle_yaml(self, model, obs_name):
-        # since flatland  can only config the model by parsing the yaml file, we need to create a file for every random obstacle
         os.makedirs(self._tmp_model_path, exist_ok=True)
 
         tmp_model_file_name = self._namespace + "_" + obs_name + ".model.yaml"
