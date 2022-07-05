@@ -2,7 +2,7 @@ from threading import Lock
 import rospy
 from geometry_msgs.msg import PoseStamped
 from task_generator.constants import TaskMode
-from std_srvs.srv import Empty
+from std_srvs.srv import Empty, EmptyRequest
 
 from task_generator.tasks.random import RandomTask
 from task_generator.tasks.task_factory import TaskFactory
@@ -26,8 +26,10 @@ class ManualTask(RandomTask):
         robot_manager,
         map_manager,
         namespace = "",
+        *args, 
+        **kwargs
     ):
-        super().__init__(obstacles_manager, robot_manager, map_manager)
+        super().__init__(obstacles_manager, robot_manager, map_manager, *args, **kwargs)
 
         self.namespace = namespace
         self.namespace_prefix = "" if namespace == "" else "/" + namespace + "/"
@@ -48,4 +50,6 @@ class ManualTask(RandomTask):
         
         self._current_goal = [goal.x, goal.y, 0]
 
-        self._trigger_reset_srv()
+        rospy.loginfo(f"Set goal position to {self._current_goal}")
+
+        self._trigger_reset_srv(EmptyRequest())

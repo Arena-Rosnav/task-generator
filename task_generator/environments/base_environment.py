@@ -25,3 +25,12 @@ class BaseEnvironment:
 
     def spawn_robot(self):
         raise NotImplementedError()
+
+    def spawn_pedsim_agents(self, agents):
+        raise NotImplementedError()
+
+    def reset_pedsim_agents(self):
+        raise NotImplementedError()
+
+    def spawn_obstacle(self, yaml_path, position):
+        raise NotImplementedError()

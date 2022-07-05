@@ -4,7 +4,7 @@ import math
 import rospy
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Int16, Bool
-from std_srvs.srv import Empty
+from std_srvs.srv import Empty, EmptyResponse
 from geometry_msgs.msg import PoseStamped
 
 
@@ -29,7 +29,6 @@ class TaskGenerator:
 
         ## Params
         self.task_mode = rospy.get_param("/task_mode")
-        scenarios_json_path = rospy.get_param("~scenarios_json_path")
         self.auto_reset = rospy.get_param("~auto_reset", True)
 
         ## Publishers
@@ -55,10 +54,8 @@ class TaskGenerator:
 
         rospy.loginfo(f"Launching task mode: {self.task_mode}")
 
-        paths = {"scenario_json_path": scenarios_json_path}
-
         self.start_time = rospy.get_time() 
-        self.task = get_predefined_task("", self.task_mode, self.env_wrapper, paths=paths)
+        self.task = get_predefined_task("", self.task_mode, self.env_wrapper)
 
         self.first_round = True
         self.curr_goal_pos = None
@@ -90,6 +87,10 @@ class TaskGenerator:
     def reset_task(self):
         self.start_time = rospy.get_time()
 
+        rospy.loginfo("=============")
+        rospy.loginfo("Task Reseted!")
+        rospy.loginfo("=============")
+
         self.env_wrapper.before_reset_task()
 
         self._clear_constmaps_srv()
@@ -100,10 +101,6 @@ class TaskGenerator:
         
         self.pub_scenario_reset.publish(self.number_of_resets)
         self._send_end_message_when_is_end(is_end)
-
-        rospy.loginfo("=============")
-        rospy.loginfo("Task Reseted!")
-        rospy.loginfo("=============")
 
         self.env_wrapper.after_reset_task()
 
@@ -125,9 +122,13 @@ class TaskGenerator:
 
         self.reset_task()
 
+        return EmptyResponse()
+
     def _send_end_message_when_is_end(self, is_end):
         if not is_end:
             return
+
+        rospy.loginfo("Shutting down. All tasks completed")
 
         self.pub_scenario_finished.publish(Bool(True))
         rospy.signal_shutdown("Finished all episodes of the current scenario")

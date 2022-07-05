@@ -1,6 +1,7 @@
 from abc import abstractmethod
 import rospy
 from geometry_msgs.msg import PoseStamped, Pose2D
+from std_srvs.srv import Trigger
 import tf
 import numpy as np
 import os
@@ -15,6 +16,7 @@ from flatland_msgs.srv import (
     DeleteModel,
     SpawnModelRequest
 )
+from pedsim_srvs.srv import SpawnPeds
 
 from ..constants import Constants, FlatlandRandomModel
 from .base_environment import BaseEnvironment
@@ -62,6 +64,9 @@ class FlatlandEnvironment(BaseEnvironment):
         self._spawn_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}spawn_model", SpawnModel)
         self._delete_model_srv = rospy.ServiceProxy(f'{self._ns_prefix}delete_model', DeleteModel)
 
+        self._spawn_peds_srv = rospy.ServiceProxy("pedsim_simulator/spawn_peds", SpawnPeds)
+        self._reset_peds_srv = rospy.ServiceProxy("pedsim_simulator/reset_all_peds", Trigger)
+
         self._obstacles_amount = 0
 
     def before_reset_task(self):
@@ -84,6 +89,21 @@ class FlatlandEnvironment(BaseEnvironment):
 
         self._delete_model_srv(delete_model_request)
 
+    def spawn_pedsim_agents(self, agents):
+        peds = [agent.getPedMsg() for agent in agents]
+
+        self._spawn_peds_srv(peds)
+
+    def reset_pedsim_agents(self):
+        self._reset_peds_srv()
+
+    def spawn_obstacle(self, yaml_path, position):
+        name = FlatlandEnvironment.create_obs_name(self._obstacles_amount)
+
+        self._spawn_model(yaml_path, name, self._namespace, position)
+
+        self._obstacles_amount += 1
+        
     def spawn_random_dynamic_obstacle(self, **args):
         self._spawn_random_obstacle(**args, is_dynamic=True)
 
@@ -243,3 +263,7 @@ class FlatlandEnvironment(BaseEnvironment):
     @abstractmethod
     def create_obs_name(number):
         return "obs_" + str(number)
+
+    @abstractmethod
+    def check_yaml_path(path):
+        return os.path.isfile(path)

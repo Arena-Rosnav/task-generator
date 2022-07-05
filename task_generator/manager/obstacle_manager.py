@@ -6,8 +6,19 @@ class ObstacleManager:
         self.map_manager = map_manager
         self.environment = environment
 
+    def start_scenario(self, scenario):
+        self.environment.spawn_pedsim_agents(scenario.pedsimAgents)
+
     def reset_scenario(self, scenario):
-        pass
+        self.environment.reset_pedsim_agents()
+
+        self.environment.remove_all_obstacles()
+
+        for obstacle in scenario.staticObstacles:
+            self.environment.spawn_obstacle(
+                obstacle.flatlandModel.path,
+                [*obstacle.pos, 0]
+            )
 
     def reset_random(
             self, 

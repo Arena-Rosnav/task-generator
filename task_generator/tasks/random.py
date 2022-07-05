@@ -1,4 +1,5 @@
 import random
+import rospy
 
 from task_generator.constants import Constants, TaskMode
 from task_generator.tasks.task_factory import TaskFactory
@@ -48,5 +49,7 @@ class RandomTask(BaseTask):
                 ),
             ]
         )
+
+        rospy.loginfo(f"Spawning {dynamic_obstacles} dynamic and {static_obstacles} static obstacles")
 
         return False, goal_pos

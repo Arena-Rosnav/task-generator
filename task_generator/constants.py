@@ -23,6 +23,9 @@ class TaskMode:
         MAX_DYNAMIC_OBS = 5
         MIN_STATIC_OBS = 1
         MAX_STATIC_OBS = 5
+
+    class Scenario:
+        RESETS_DEFAULT = 5
         
 
 class FlatlandRandomModel:
@@ -48,3 +51,4 @@ class FlatlandRandomModel:
     }
     LINEAR_VEL = 0.3
     ANGLUAR_VEL_MAX = 0.78
+
