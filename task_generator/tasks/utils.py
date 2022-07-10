@@ -10,13 +10,15 @@ from task_generator.manager.robot_manager import RobotManager
 from task_generator.tasks.task_factory import TaskFactory
 from task_generator.tasks.manual import ManualTask
 from task_generator.tasks.random import RandomTask
-from task_generator.tasks.scenario import ScenarioTask
+
+# from task_generator.tasks.scenario import ScenarioTask
 from task_generator.tasks.staged import StagedRandomTask
 from task_generator.utils import Utils
 
+
 def get_predefined_task(namespace, mode, environment, **kwargs):
     """
-        Gets the task based on the passed mode
+    Gets the task based on the passed mode
     """
     rospy.wait_for_service("/static_map")
     service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
@@ -27,17 +29,27 @@ def get_predefined_task(namespace, mode, environment, **kwargs):
     robot_manager = RobotManager(namespace, map_manager, environment)
     obstacle_manager = ObstacleManager(namespace, map_manager, environment)
 
-    task = TaskFactory.instantiate(mode, obstacle_manager, robot_manager, map_manager, namespace=namespace, **kwargs)
+    task = TaskFactory.instantiate(
+        mode,
+        obstacle_manager,
+        robot_manager,
+        map_manager,
+        namespace=namespace,
+        **kwargs
+    )
 
     return task
 
+
 def get_predefined_task_outside(namespace, mode, start_stage, paths):
     """
-        When a task should be used outside of the
-        task generator node, this function is used
-        to initialize the task manager with the
-        used environment (flatland, gazebo, ...)
+    When a task should be used outside of the
+    task generator node, this function is used
+    to initialize the task manager with the
+    used environment (flatland, gazebo, ...)
     """
     environment = EnvironmentFactory.instantiate(Utils.get_environment())(namespace)
 
-    return get_predefined_task(namespace, mode, environment, start_stage=start_stage, paths=paths)
+    return get_predefined_task(
+        namespace, mode, environment, start_stage=start_stage, paths=paths
+    )

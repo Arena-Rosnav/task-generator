@@ -7,9 +7,9 @@ from task_generator.constants import Constants
 
 class MapManager:
     """
-        The map manager manages the static map
-        and is used to get new goal, robot and
-        obstacle positions.
+    The map manager manages the static map
+    and is used to get new goal, robot and
+    obstacle positions.
     """
 
     def __init__(self, map: OccupancyGrid):
@@ -19,32 +19,35 @@ class MapManager:
         self.map = map
 
         self._set_freespace_indices()
-    
+
     def get_random_pos_on_map(self, safe_dist: float, forbidden_zones: list = None):
         """
-            This function is used by the robot manager and 
-            obstacles manager to get new positions for both
-            robot and obstalces.
+        This function is used by the robot manager and
+        obstacles manager to get new positions for both
+        robot and obstalces.
 
-            The function will choose a position at random
-            and then validate the position. If the position
-            is not valid a new position is chosen. When 
-            no valid position is found after 100 retries
-            an error is thrown.
+        The function will choose a position at random
+        and then validate the position. If the position
+        is not valid a new position is chosen. When
+        no valid position is found after 100 retries
+        an error is thrown.
 
-            Args:
-                safe_dist: minimal distance to the next 
-                    obstacles for calculated positons 
-                forbidden_zones: Array of (x, y, radius), 
-                    describing circles on the map. New
-                    position should not lie on forbidden
-                    zones e.g. the circles.
+        Args:
+            safe_dist: minimal distance to the next
+                obstacles for calculated positons
+            forbidden_zones: Array of (x, y, radius),
+                describing circles on the map. New
+                position should not lie on forbidden
+                zones e.g. the circles.
 
-            Returns:
-                A tuple with three elements: x, y, theta
+        Returns:
+            A tuple with three elements: x, y, theta
         """
-        assert len(self.free_space_indices) == 2 and len(self.free_space_indices[0]) == len(
-            self.free_space_indices[1]), "free_space_indices is not correctly setup"
+        assert len(self.free_space_indices) == 2 and len(
+            self.free_space_indices[0]
+        ) == len(
+            self.free_space_indices[1]
+        ), "free_space_indices is not correctly setup"
 
         n_freespace_cells = len(self.free_space_indices[0])
         n_check_failed = 0
@@ -54,11 +57,18 @@ class MapManager:
             idx = random.randint(0, n_freespace_cells - 1)
 
             # in cells
-            y_in_cells, x_in_cells = self.free_space_indices[0][idx], self.free_space_indices[1][idx]
-            
+            y_in_cells, x_in_cells = (
+                self.free_space_indices[0][idx],
+                self.free_space_indices[1][idx],
+            )
+
             # convert x, y in meters
-            y_in_meters = y_in_cells * self.map.info.resolution + self.map.info.origin.position.y
-            x_in_meters = x_in_cells * self.map.info.resolution + self.map.info.origin.position.x
+            y_in_meters = (
+                y_in_cells * self.map.info.resolution + self.map.info.origin.position.y
+            )
+            x_in_meters = (
+                x_in_cells * self.map.info.resolution + self.map.info.origin.position.x
+            )
 
             if self._is_pos_valid(x_in_meters, y_in_meters, safe_dist, forbidden_zones):
                 break
@@ -73,16 +83,19 @@ class MapManager:
         return x_in_meters, y_in_meters, theta
 
     def _is_pos_valid(self, x, y, safe_dist, forbidden_zones):
-        return (
-            self._check_safe_dist(x, y, safe_dist, forbidden_zones) 
-            or self._check_static_map_dist(x, y, int(safe_dist / self.map.info.resolution))
+        return self._check_safe_dist(
+            x, y, safe_dist, forbidden_zones
+        ) or self._check_static_map_dist(
+            x, y, int(safe_dist / self.map.info.resolution)
         )
 
     def _check_safe_dist(self, x, y, safe_dist, forbidden_zones):
         for zone in forbidden_zones:
-            if math.sqrt((x - zone[0]) ** 2 + (y - zone[1]) ** 2) < (zone[2] + safe_dist):
+            if math.sqrt((x - zone[0]) ** 2 + (y - zone[1]) ** 2) < (
+                zone[2] + safe_dist
+            ):
                 return False
-        
+
         return True
 
     def _check_static_map_dist(self, x, y, cell_radius):
