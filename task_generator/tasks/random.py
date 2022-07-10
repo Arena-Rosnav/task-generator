@@ -16,8 +16,17 @@ class RandomTask(BaseTask):
         each task.
     """
 
-    def reset(self, start=None, goal=None):
-        return super().reset(lambda: self._reset_robot_and_obstacles(start, goal))
+    def reset(
+            self, start=None, goal=None, 
+            static_obstacles=None, dynamic_obstacles=None
+        ):
+        return super().reset(
+            lambda: self._reset_robot_and_obstacles(
+                start=start, goal=goal,
+                static_obstacles=static_obstacles, 
+                dynamic_obstacles=dynamic_obstacles
+            )
+        )
 
     def _reset_robot_and_obstacles(
             self, start=None, goal=None, dynamic_obstacles=None, static_obstacles=None
@@ -49,7 +58,5 @@ class RandomTask(BaseTask):
                 ),
             ]
         )
-
-        rospy.loginfo(f"Spawning {dynamic_obstacles} dynamic and {static_obstacles} static obstacles")
 
         return False, goal_pos

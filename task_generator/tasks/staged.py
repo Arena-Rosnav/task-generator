@@ -56,17 +56,19 @@ class StagedRandomTask(RandomTask):
 
         self._init_stage(self._curr_stage)
 
-    def next_stage(self):
+    def next_stage(self, _):
         if self._curr_stage >= len(self._stages):
             rospy.loginfo(f"({self.namespace}) INFO: Tried to trigger next stage but already reached last one")
+            return
 
         self._curr_stage = self._curr_stage + 1
         
         return self._init_stage_and_update_hyperparams(self._curr_stage)
 
-    def previous_stage(self):
+    def previous_stage(self, _):
         if self._curr_stage <= 1:
             rospy.loginfo(f"({self.namespace}) INFO: Tried to trigger previous stage but already reached first one")
+            return
 
         self._curr_stage = self._curr_stage - 1
         
@@ -105,10 +107,17 @@ class StagedRandomTask(RandomTask):
 
         self._hyperparams_lock.release()
 
-    def _reset_robot_and_obstacles(self, static_obstacles=None, dynamic_obstacles=None):
+    def reset(self):
+        super().reset(
+            static_obstacles=self._stages[self._curr_stage]["static"],
+            dynamic_obstacles=self._stages[self._curr_stage]["dynamic"]
+        )
+
+    def _reset_robot_and_obstacles(self, static_obstacles=None, dynamic_obstacles=None, **kwargs):
         super()._reset_robot_and_obstacles(
             static_obstacles=static_obstacles, 
-            dynamic_obstacles=dynamic_obstacles
+            dynamic_obstacles=dynamic_obstacles,
+            **kwargs
         )
 
     def _init_stage(self, stage):

@@ -62,10 +62,10 @@ class FlatlandEnvironment(BaseEnvironment):
 
         self._move_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}move_model", MoveModel)
         self._spawn_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}spawn_model", SpawnModel)
-        self._delete_model_srv = rospy.ServiceProxy(f'{self._ns_prefix}delete_model', DeleteModel)
+        self._delete_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}delete_model", DeleteModel)
 
-        self._spawn_peds_srv = rospy.ServiceProxy("pedsim_simulator/spawn_peds", SpawnPeds)
-        self._reset_peds_srv = rospy.ServiceProxy("pedsim_simulator/reset_all_peds", Trigger)
+        self._spawn_peds_srv = rospy.ServiceProxy(f"{self._ns_prefix}pedsim_simulator/spawn_peds", SpawnPeds)
+        self._reset_peds_srv = rospy.ServiceProxy(f"{self._ns_prefix}pedsim_simulator/reset_all_peds", Trigger)
 
         self._obstacles_amount = 0
 
