@@ -34,13 +34,21 @@ The **curriculum** file has the following schema.
 2:
   static: <amount of static obstacles for stage 2>
   dynamic: <amount of dynamic obstacles for stage 2>
-\.\.\.
+---
 N:
   static: <amount of static obstacles for stage N>
   dynamic: <amount of dynamic obstacles for stage N>
 ```
 
 ### Scenario Task
+
+The scenario task is especially designed for evaluation. One can defined scenarios
+is a scenario file, which is read in when starting the simulation. In the scenario
+file dynamic and static obstacles as well as the start and goal position of the
+robot are defined.
+
+The scenario declaration file can be created with arena-tools and has to follow
+the specified file schema.
 
 ## Environment Factory
 
