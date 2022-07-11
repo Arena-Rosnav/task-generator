@@ -32,7 +32,9 @@ class ScenarioTask(BaseTask):
         self.desired_resets = self.scenario.resets
 
         if self.desired_resets <= 0:
-            rospy.loginfo(f"Setting resets to default of {TaskMode.Scenario.RESETS_DEFAULT}")
+            rospy.loginfo(
+                f"Setting resets to default of {TaskMode.Scenario.RESETS_DEFAULT}"
+            )
             self.desired_resets = TaskMode.Scenario.RESETS_DEFAULT
 
         self.obstacles_manager.start_scenario(self.scenario)
@@ -67,7 +69,11 @@ class ScenarioTask(BaseTask):
 
     def _check_map_paths(self):
         static_map = rospy.get_param("map_path")
-        scenario_map_path = os.path.join(rospkg.RosPack().get_path("arena-simulation-setup"), "maps", self.scenario.mapPath)
+        scenario_map_path = os.path.join(
+            rospkg.RosPack().get_path("arena-simulation-setup"), 
+            "maps", 
+            self.scenario.mapPath
+        )
 
         if not static_map == scenario_map_path:
             rospy.logerr("Map path of scenario and static map are not the same. Shutting down.")

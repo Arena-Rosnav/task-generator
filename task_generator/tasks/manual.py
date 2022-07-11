@@ -29,14 +29,20 @@ class ManualTask(RandomTask):
         *args, 
         **kwargs
     ):
-        super().__init__(obstacles_manager, robot_manager, map_manager, *args, **kwargs)
+        super().__init__(
+            obstacles_manager, robot_manager, map_manager, *args, **kwargs
+        )
 
         self.namespace = namespace
         self.namespace_prefix = "" if namespace == "" else "/" + namespace + "/"
 
         self.prevent_endless_loop_lock = Lock()
 
-        rospy.Subscriber(f"{self.namespace_prefix}/task_generator/set_goal", PoseStamped, self._set_goal_callback)
+        rospy.Subscriber(
+            f"{self.namespace_prefix}/task_generator/set_goal", 
+            PoseStamped, 
+            self._set_goal_callback
+        )
 
         self._trigger_reset_srv = rospy.ServiceProxy("task_generator", Empty)
 

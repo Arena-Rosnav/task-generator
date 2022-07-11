@@ -20,7 +20,7 @@ class MapManager:
 
         self._set_freespace_indices()
 
-    def get_random_pos_on_map(self, safe_dist: float, forbidden_zones: list = None):
+    def get_random_pos_on_map(self, safe_dist, forbidden_zones=None):
         """
         This function is used by the robot manager and
         obstacles manager to get new positions for both
@@ -64,10 +64,12 @@ class MapManager:
 
             # convert x, y in meters
             y_in_meters = (
-                y_in_cells * self.map.info.resolution + self.map.info.origin.position.y
+                y_in_cells * self.map.info.resolution 
+                + self.map.info.origin.position.y
             )
             x_in_meters = (
-                x_in_cells * self.map.info.resolution + self.map.info.origin.position.x
+                x_in_cells * self.map.info.resolution 
+                + self.map.info.origin.position.x
             )
 
             if self._is_pos_valid(x_in_meters, y_in_meters, safe_dist, forbidden_zones):

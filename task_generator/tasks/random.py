@@ -29,7 +29,8 @@ class RandomTask(BaseTask):
         )
 
     def _reset_robot_and_obstacles(
-        self, start=None, goal=None, dynamic_obstacles=None, static_obstacles=None
+        self, start=None, goal=None, 
+        dynamic_obstacles=None, static_obstacles=None
     ):
         start_pos, goal_pos = self.robot_manager.reset(
             start_pos=start, goal_pos=goal)
@@ -50,12 +51,14 @@ class RandomTask(BaseTask):
                 (
                     start_pos[0],
                     start_pos[1],
-                    self.robot_manager.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
+                    self.robot_manager.robot_radius 
+                        + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
                 ),
                 (
                     goal_pos[0],
                     goal_pos[1],
-                    self.robot_manager.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
+                    self.robot_manager.robot_radius 
+                        + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
                 ),
             ]
         )

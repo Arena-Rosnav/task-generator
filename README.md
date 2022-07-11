@@ -43,3 +43,9 @@ N:
 ### Scenario Task
 
 ## Environment Factory
+
+To be able to use the task generator module in all our environments without changes, a unified interface between environment and task generator is needed. The interface contains a lot of functions to spawn, publish or move robots or obstacles, and a lot more.
+
+At the moment we provide environment interfaces for **Flatland** and **Gazebo**. In order to add a new environment, in which the task generator should be used, a new environment interface has to be created in `/taks_generator/environments/' and has to be registrated in the environment factory.
+
+Your newly created environment interface should derive the **BaseEnvironment** located [here](TODO) and implement all functions. A detailed description of the functions is contained in the **BaseEnvironment** itself.

@@ -130,7 +130,9 @@ class StagedRandomTask(RandomTask):
             dynamic_obstacles=self._stages[self._curr_stage]["dynamic"]
         )
 
-    def _reset_robot_and_obstacles(self, static_obstacles=None, dynamic_obstacles=None, **kwargs):
+    def _reset_robot_and_obstacles(
+            self, static_obstacles=None, dynamic_obstacles=None, **kwargs
+        ):
         super()._reset_robot_and_obstacles(
             static_obstacles=static_obstacles, 
             dynamic_obstacles=dynamic_obstacles,

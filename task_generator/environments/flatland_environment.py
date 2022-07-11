@@ -22,6 +22,9 @@ from .base_environment import BaseEnvironment
 from .environment_factory import EnvironmentFactory
 
 
+T = Constants.WAIT_FOR_SERVICE_TIMEOUT
+
+
 @EnvironmentFactory.register("flatland")
 class FlatlandEnvironment(BaseEnvironment):
     """
@@ -45,8 +48,12 @@ class FlatlandEnvironment(BaseEnvironment):
         self._namespace = namespace
         self._ns_prefix = "" if namespace == "" else "/" + namespace + "/"
 
-        self._goal_pub = rospy.Publisher(f"{self._ns_prefix}goal", PoseStamped, queue_size=1, latch=True)
-        self._move_base_goal_pub = rospy.Publisher("/move_base_simple/goal", PoseStamped, queue_size=1, latch=True)
+        self._goal_pub = rospy.Publisher(
+            f"{self._ns_prefix}goal", PoseStamped, queue_size=1, latch=True
+        )
+        self._move_base_goal_pub = rospy.Publisher(
+            "/move_base_simple/goal", PoseStamped, queue_size=1, latch=True
+        )
 
         self._robot_name = rospy.get_param("robot_model")
         self._robot_radius = rospy.get_param("robot_radius")
@@ -55,19 +62,33 @@ class FlatlandEnvironment(BaseEnvironment):
         self._robot_yaml_path = rospy.get_param("robot_yaml_path")
         self._tmp_model_path = rospy.get_param("tmp_model_path", "/tmp")
 
-        rospy.wait_for_service(f"{self._ns_prefix}move_model", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
-        rospy.wait_for_service(f"{self._ns_prefix}spawn_model", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
-        rospy.wait_for_service(f"{self._ns_prefix}delete_model", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
+        rospy.wait_for_service(f"{self._ns_prefix}move_model", timeout=T)
+        rospy.wait_for_service(f"{self._ns_prefix}spawn_model", timeout=T)
+        rospy.wait_for_service(f"{self._ns_prefix}delete_model", timeout=T)
 
-        self._move_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}move_model", MoveModel, persistent=True)
-        self._spawn_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}spawn_model", SpawnModel)
-        self._delete_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}delete_model", DeleteModel)
+        self._move_model_srv = rospy.ServiceProxy(
+            f"{self._ns_prefix}move_model", MoveModel, persistent=True
+        )
+        self._spawn_model_srv = rospy.ServiceProxy(
+            f"{self._ns_prefix}spawn_model", SpawnModel
+        )
+        self._delete_model_srv = rospy.ServiceProxy(
+            f"{self._ns_prefix}delete_model", DeleteModel
+        )
 
-        rospy.wait_for_service(f"{self._ns_prefix}pedsim_simulator/spawn_peds", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
-        rospy.wait_for_service(f"{self._ns_prefix}pedsim_simulator/reset_all_peds", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
+        rospy.wait_for_service(
+            f"{self._ns_prefix}pedsim_simulator/spawn_peds", timeout=T
+        )
+        rospy.wait_for_service(
+            f"{self._ns_prefix}pedsim_simulator/reset_all_peds", timeout=T
+        )
 
-        self._spawn_peds_srv = rospy.ServiceProxy(f"{self._ns_prefix}pedsim_simulator/spawn_peds", SpawnPeds)
-        self._reset_peds_srv = rospy.ServiceProxy(f"{self._ns_prefix}pedsim_simulator/reset_all_peds", Trigger)
+        self._spawn_peds_srv = rospy.ServiceProxy(
+            f"{self._ns_prefix}pedsim_simulator/spawn_peds", SpawnPeds
+        )
+        self._reset_peds_srv = rospy.ServiceProxy(
+            f"{self._ns_prefix}pedsim_simulator/reset_all_peds", Trigger
+        )
 
         self._obstacles_amount = 0
 
@@ -112,10 +133,14 @@ class FlatlandEnvironment(BaseEnvironment):
     def spawn_random_static_obstacle(self, **args):
         self._spawn_random_obstacle(**args, is_dynamic=False)
 
-    def _spawn_random_obstacle(self, is_dynamic=False, position=[0, 0, 0], **args):
+    def _spawn_random_obstacle(
+            self, is_dynamic=False, position=[0, 0, 0], **args
+        ):
         model = self._generate_random_obstacle(is_dynamic=is_dynamic, **args)
 
-        obstacle_name = FlatlandEnvironment.create_obs_name(self._obstacles_amount)
+        obstacle_name = FlatlandEnvironment.create_obs_name(
+            self._obstacles_amount
+        )
 
         model_path = self._create_obstacle_yaml(model, obstacle_name)
 
@@ -124,7 +149,9 @@ class FlatlandEnvironment(BaseEnvironment):
         self._obstacles_amount += 1 
 
     def spawn_robot(self):
-        self._spawn_model(self._robot_yaml_path, self._robot_name, self._namespace, [0, 0, 0])
+        self._spawn_model(
+            self._robot_yaml_path, self._robot_name, self._namespace, [0, 0, 0]
+        )
 
     def _spawn_model(self, yaml_path, name, namespace, position):
         request = SpawnModelRequest()
@@ -232,7 +259,7 @@ class FlatlandEnvironment(BaseEnvironment):
                 "radius": radius
             }
 
-        points_amount = random.randint(3, 8) # Defined in flatland model definition
+        points_amount = random.randint(3, 8) # Defined in flatland definition
         angle_interval = 2 * np.pi / points_amount
 
         points = []
@@ -243,7 +270,10 @@ class FlatlandEnvironment(BaseEnvironment):
 
             real_angle = angle_interval * p + angle
 
-            points.append([math.cos(real_angle) * radius, math.sin(real_angle) * radius])
+            points.append([
+                math.cos(real_angle) * radius, 
+                math.sin(real_angle) * radius
+            ])
 
         return {
             "type": type,
