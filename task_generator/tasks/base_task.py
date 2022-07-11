@@ -1,5 +1,4 @@
 import rospy
-from threading import Lock
 from nav_msgs.srv import GetMap
 from nav_msgs.msg import OccupancyGrid
 from task_generator.constants import Constants
@@ -16,7 +15,6 @@ class BaseTask():
         self.map_manager = map_manager
         
         self._service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
-        self._map_lock = Lock()
 
         rospy.Subscriber("/map", OccupancyGrid, self._update_map)
 
@@ -27,8 +25,6 @@ class BaseTask():
             again. After MAX_RESET_FAIL_TIMES the reset is considered
             as fail and the simulation is shut down.
         """
-        self._map_lock.acquire()
-
         fails = 0
         return_val = False, None 
 
@@ -45,10 +41,7 @@ class BaseTask():
             rospy.signal_shutdown("Reset error!")
             raise Exception("reset error!")
 
-        self._map_lock.release()
-
         return return_val
 
     def _update_map(self, map):
-        with self._map_lock:
-            self.map_manager.update_map(map)
+        self.map_manager.update_map(map)

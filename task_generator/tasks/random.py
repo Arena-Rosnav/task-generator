@@ -17,24 +17,25 @@ class RandomTask(BaseTask):
     """
 
     def reset(
-            self, start=None, goal=None, 
-            static_obstacles=None, dynamic_obstacles=None
-        ):
+        self, start=None, goal=None,
+        static_obstacles=None, dynamic_obstacles=None
+    ):
         return super().reset(
             lambda: self._reset_robot_and_obstacles(
                 start=start, goal=goal,
-                static_obstacles=static_obstacles, 
+                static_obstacles=static_obstacles,
                 dynamic_obstacles=dynamic_obstacles
             )
         )
 
     def _reset_robot_and_obstacles(
-            self, start=None, goal=None, dynamic_obstacles=None, static_obstacles=None
-        ):
-        start_pos, goal_pos = self.robot_manager.reset(start_pos=start, goal_pos=goal)
+        self, start=None, goal=None, dynamic_obstacles=None, static_obstacles=None
+    ):
+        start_pos, goal_pos = self.robot_manager.reset(
+            start_pos=start, goal_pos=goal)
 
         dynamic_obstacles = random.randint(
-            TaskMode.Random.MIN_DYNAMIC_OBS, 
+            TaskMode.Random.MIN_DYNAMIC_OBS,
             TaskMode.Random.MAX_DYNAMIC_OBS
         ) if dynamic_obstacles == None else dynamic_obstacles
         static_obstacles = random.randint(

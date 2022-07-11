@@ -2,7 +2,6 @@ from abc import abstractmethod
 import rospy
 from geometry_msgs.msg import PoseStamped, Pose2D
 from std_srvs.srv import Trigger
-import tf
 import numpy as np
 import os
 import yaml
@@ -60,9 +59,12 @@ class FlatlandEnvironment(BaseEnvironment):
         rospy.wait_for_service(f"{self._ns_prefix}spawn_model", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
         rospy.wait_for_service(f"{self._ns_prefix}delete_model", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
 
-        self._move_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}move_model", MoveModel)
+        self._move_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}move_model", MoveModel, persistent=True)
         self._spawn_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}spawn_model", SpawnModel)
         self._delete_model_srv = rospy.ServiceProxy(f"{self._ns_prefix}delete_model", DeleteModel)
+
+        rospy.wait_for_service(f"{self._ns_prefix}pedsim_simulator/spawn_peds", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
+        rospy.wait_for_service(f"{self._ns_prefix}pedsim_simulator/reset_all_peds", timeout=Constants.WAIT_FOR_SERVICE_TIMEOUT)
 
         self._spawn_peds_srv = rospy.ServiceProxy(f"{self._ns_prefix}pedsim_simulator/spawn_peds", SpawnPeds)
         self._reset_peds_srv = rospy.ServiceProxy(f"{self._ns_prefix}pedsim_simulator/reset_all_peds", Trigger)
@@ -142,11 +144,11 @@ class FlatlandEnvironment(BaseEnvironment):
         goal_msg.header.frame_id = "map"
         goal_msg.pose.position.x = goal[0]
         goal_msg.pose.position.y = goal[1]
-        quaternion = tf.transformations.quaternion_from_euler(0, 0, 0)
-        goal_msg.pose.orientation.w = quaternion[0]
-        goal_msg.pose.orientation.x = quaternion[1]
-        goal_msg.pose.orientation.y = quaternion[2]
-        goal_msg.pose.orientation.z = quaternion[3]
+
+        goal_msg.pose.orientation.w = 0
+        goal_msg.pose.orientation.x = 0
+        goal_msg.pose.orientation.y = 0
+        goal_msg.pose.orientation.z = 1
 
         self._goal_pub.publish(goal_msg)
         self._move_base_goal_pub.publish(goal_msg)

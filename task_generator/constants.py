@@ -26,7 +26,6 @@ class TaskMode:
 
     class Scenario:
         RESETS_DEFAULT = 5
-        
 
 class FlatlandRandomModel:
     BODY = {

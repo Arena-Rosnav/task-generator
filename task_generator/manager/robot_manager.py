@@ -28,7 +28,9 @@ class RobotManager:
             move base and rviz and moves the robot to
             the start position.
         """
-        start, goal = self.generate_new_start_and_goal(forbidden_zones, start_pos, goal_pos)
+        start, goal = self.generate_new_start_and_goal(
+            forbidden_zones, start_pos, goal_pos
+        )
 
         self.publish_goal()
         self.move_robot_to_start()
@@ -39,7 +41,7 @@ class RobotManager:
         self.start_pos = self._default_position(
             start_pos,
             self.map_manager.get_random_pos_on_map(
-                self.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST, 
+                self.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
                 forbidden_zones
             )
         )
@@ -47,7 +49,7 @@ class RobotManager:
         self.goal_pos = self._default_position(
             goal_pos,
             self.map_manager.get_random_pos_on_map(
-                3 * self.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST, 
+                3 * self.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
                 [
                     *forbidden_zones,
                     (
@@ -74,4 +76,4 @@ class RobotManager:
         if not pos == None:
             return pos
 
-        return callback_pos 
+        return callback_pos
