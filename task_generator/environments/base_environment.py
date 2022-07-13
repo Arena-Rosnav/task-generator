@@ -68,10 +68,13 @@ class BaseEnvironment:
         raise NotImplementedError()
 
     def spawn_pedsim_agents(self, agents):
+        """
+        
+        """
         raise NotImplementedError()
 
     def reset_pedsim_agents(self):
         raise NotImplementedError()
 
-    def spawn_obstacle(self, yaml_path, position):
+    def spawn_obstacle(self, position, yaml_path=""):
         raise NotImplementedError()

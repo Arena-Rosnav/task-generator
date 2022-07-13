@@ -1,7 +1,5 @@
 from task_generator.constants import Constants
-from threading import Thread
 
-import time
 
 class ObstacleManager:
     def __init__(self, namespace, map_manager, environment):
@@ -18,8 +16,8 @@ class ObstacleManager:
 
         for obstacle in scenario.staticObstacles:
             self.environment.spawn_obstacle(
-                obstacle.flatlandModel.path,
-                [*obstacle.pos, 0]
+                [*obstacle.pos, 0],
+                yaml_path=obstacle.flatlandModel.path,
             )
 
     def reset_random(

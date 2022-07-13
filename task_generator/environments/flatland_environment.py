@@ -76,13 +76,6 @@ class FlatlandEnvironment(BaseEnvironment):
             f"{self._ns_prefix}delete_model", DeleteModel
         )
 
-        rospy.wait_for_service(
-            f"{self._ns_prefix}pedsim_simulator/spawn_peds", timeout=T
-        )
-        rospy.wait_for_service(
-            f"{self._ns_prefix}pedsim_simulator/reset_all_peds", timeout=T
-        )
-
         self._spawn_peds_srv = rospy.ServiceProxy(
             f"{self._ns_prefix}pedsim_simulator/spawn_peds", SpawnPeds
         )
@@ -120,7 +113,7 @@ class FlatlandEnvironment(BaseEnvironment):
     def reset_pedsim_agents(self):
         self._reset_peds_srv()
 
-    def spawn_obstacle(self, yaml_path, position):
+    def spawn_obstacle(self, position, yaml_path=""):
         name = FlatlandEnvironment.create_obs_name(self._obstacles_amount)
 
         self._spawn_model(yaml_path, name, self._namespace, position)
