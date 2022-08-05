@@ -17,7 +17,7 @@ Creates random static and dynamic obstacles when a new task is started. When sta
 
 ### Manual Task
 
-Manual task mode is the same as the random task beside that a goal can be set manually via the rviz 2D goal button.
+Manual task mode is the same as the random task except that a goal must be set manually via the rviz *2D Nav Goal* button.
 
 > TODO IMAGE
 
@@ -47,13 +47,13 @@ is a scenario file, which is read in when starting the simulation. In the scenar
 file dynamic and static obstacles as well as the start and goal position of the
 robot are defined.
 
-The scenario declaration file can be created with arena-tools and has to follow
+The scenario declaration file can be created with [arena-tools](https://github.com/Arena-Rosnav/arena-tools) and has to follow
 the specified file schema.
 
 ## Environment Factory
 
 To be able to use the task generator module in all our environments without changes, a unified interface between environment and task generator is needed. The interface contains a lot of functions to spawn, publish or move robots or obstacles, and a lot more.
 
-At the moment we provide environment interfaces for **Flatland** and **Gazebo**. In order to add a new environment, in which the task generator should be used, a new environment interface has to be created in `/taks_generator/environments/' and has to be registrated in the environment factory.
+At the moment we provide environment interfaces for **Flatland** and **Gazebo**. In order to add a new environment, in which the task generator should be used, a new environment interface has to be created in `/taks_generator/environments/` and has to be registrated in the environment factory.
 
 Your newly created environment interface should derive the **BaseEnvironment** located [here](TODO) and implement all functions. A detailed description of the functions is contained in the **BaseEnvironment** itself.
