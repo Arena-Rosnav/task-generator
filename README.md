@@ -2,8 +2,8 @@
 
 This is the task generator package designed to work with:
 
-- arena-rosnav
-- arena-rosnav-3d
+- [arena-rosnav](https://github.com/Arena-Rosnav/arena-rosnav)
+- [arena-rosnav-3d]()
 
 The task generator is especially designed for single robot simulations.
 
