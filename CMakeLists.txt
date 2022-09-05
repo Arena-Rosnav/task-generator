@@ -12,5 +12,7 @@ catkin_package()
 catkin_install_python(PROGRAMS
   scripts/task_generator_node.py
 
+  scripts/scenario_helper.py
+
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

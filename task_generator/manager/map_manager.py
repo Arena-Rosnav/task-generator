@@ -81,12 +81,6 @@ class MapManager:
 
         theta = random.uniform(-math.pi, math.pi)
 
-        print(
-            round(y * self.map.info.resolution + self.origin.y, 3), 
-            round(x * self.map.info.resolution + self.origin.x, 3), 
-            forbidden_zones
-        )
-
         return (
             round(y * self.map.info.resolution + self.origin.y, 3), 
             round(x * self.map.info.resolution + self.origin.x, 3),

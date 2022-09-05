@@ -1,4 +1,3 @@
-from ast import Constant
 import traceback
 import rospy
 import rospkg
@@ -14,7 +13,6 @@ from task_generator.manager.map_manager import MapManager
 from task_generator.manager.obstacle_manager import ObstacleManager
 from task_generator.manager.robot_manager import RobotManager
 from task_generator.tasks.task_factory import TaskFactory
-from task_generator.tasks.manual import ManualTask
 from task_generator.tasks.random import RandomTask
 from task_generator.tasks.scenario import ScenarioTask
 from task_generator.tasks.staged import StagedRandomTask

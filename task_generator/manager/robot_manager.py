@@ -1,4 +1,3 @@
-from asyncio import QueueEmpty
 import traceback
 import rospy
 import roslaunch
@@ -38,34 +37,36 @@ class RobotManager:
         self.goal_radius = rospy.get_param("goal_radius", 0.7) + 1
         self.is_goal_reached = False
 
-        self.set_up_robot(robot_setup)
+        self.robot_setup = robot_setup
+
+        # self.set_up_robot(robot_setup)
 
         # self.environment.spawn_robot()
 
         # self.robot_radius = rospy.get_param("robot_radius")
         # self.goal_radius = rospy.get_param("goal_radius", 0.7) + 1
 
-    def set_up_robot(self, robot_setup):
+    def set_up_robot(self):
         if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
             self.robot_radius = rospy.get_param("robot_radius")
             self.goal_radius = rospy.get_param("goal_radius", 0.7) + 1
 
             return
 
-        print(robot_setup)
+        print(self.robot_setup)
 
         base_model_path = os.path.join(
             rospkg.RosPack().get_path("arena-simulation-setup"),
             "robot",
-            robot_setup["model"]
+            self.robot_setup["model"]
         )
 
         yaml_path = os.path.join(
             base_model_path,
-            robot_setup["model"] + ".model.yaml"
+            self.robot_setup["model"] + ".model.yaml"
         )
 
-        self.launch_robot(robot_setup)
+        self.launch_robot(self.robot_setup)
 
         file_content = self.update_plugin_topics(
             self.read_yaml(yaml_path), 
@@ -129,8 +130,6 @@ class RobotManager:
         self.start_pos, self.goal_pos = self.generate_new_start_and_goal(
             forbidden_zones, start_pos, goal_pos
         )
-
-        print("RESETTED")
 
         self.publish_goal(self.goal_pos)
         self.move_robot_to_start()

@@ -4,20 +4,21 @@ from task_generator.constants import Constants
 class ObstacleManager:
     def __init__(self, namespace, map_manager, environment):
         self.map_manager = map_manager
+        self.namespace = namespace
         self.environment = environment
 
     def start_scenario(self, scenario):
-        self.environment.spawn_pedsim_agents(scenario.pedsimAgents)
+        self.environment.spawn_pedsim_agents(scenario["obstacles"]["dynamic"])
 
     def reset_scenario(self, scenario):
         self.environment.reset_pedsim_agents()
 
         self.environment.remove_all_obstacles()
 
-        for obstacle in scenario.staticObstacles:
+        for obstacle in scenario["obstacles"]["static"]:
             self.environment.spawn_obstacle(
-                [*obstacle.pos, 0],
-                yaml_path=obstacle.flatlandModel.path,
+                [*obstacle["pos"], 0],
+                yaml_path=obstacle["yaml_path"],
             )
 
     def reset_random(

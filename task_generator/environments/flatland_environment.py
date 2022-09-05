@@ -18,6 +18,7 @@ from flatland_msgs.srv import (
 )
 from flatland_msgs.msg import MoveModelMsg
 from pedsim_srvs.srv import SpawnPeds
+from task_generator.manager.pedsim_manager import PedsimManager
 
 from ..constants import Constants, FlatlandRandomModel
 from .base_environment import BaseEnvironment
@@ -114,8 +115,11 @@ class FlatlandEnvironment(BaseEnvironment):
 
         self._delete_model_srv(delete_model_request)
 
-    def spawn_pedsim_agents(self, agents):
-        peds = [agent.getPedMsg() for agent in agents]
+    def spawn_pedsim_agents(self, dynamic_obstacles):
+        peds = [
+            PedsimManager.create_pedsim_msg(agent) 
+            for agent in dynamic_obstacles
+        ]
 
         self._spawn_peds_srv(peds)
 
@@ -144,7 +148,6 @@ class FlatlandEnvironment(BaseEnvironment):
             self._obstacles_amount
         )
 
-        # model_path = self._create_obstacle_yaml(model, obstacle_name)
         self._spawn_model(
             yaml.dump(model), 
             obstacle_name, 

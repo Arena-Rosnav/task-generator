@@ -1,7 +1,7 @@
 robots:
   - model: burger
     planner: teb
-    amount: 2
+    amount: 1
   - model: jackal
     planner: teb
-    amount: 2
+    amount: 1

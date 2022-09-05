@@ -13,8 +13,6 @@ class GazeboEnvironment(BaseEnvironment):
         self.unpause = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
         self.pause = rospy.ServiceProxy('/gazebo/pause_physics', Empty)
 
-        print("INITIALIZED")
-
     def before_reset_task(self):
         self.pause()
 
