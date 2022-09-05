@@ -15,6 +15,7 @@ from flatland_msgs.srv import (
     DeleteModel,
     SpawnModelRequest
 )
+from flatland_msgs.msg import MoveModelMsg
 from pedsim_srvs.srv import SpawnPeds
 
 from ..constants import Constants, FlatlandRandomModel
@@ -53,6 +54,10 @@ class FlatlandEnvironment(BaseEnvironment):
         )
         self._move_base_goal_pub = rospy.Publisher(
             "/move_base_simple/goal", PoseStamped, queue_size=1, latch=True
+        )
+
+        self._move_robot_pub = rospy.Publisher(
+            self._ns_prefix + "/move_model", MoveModelMsg, queue_size=10
         )
 
         self._robot_name = rospy.get_param("robot_model")
@@ -179,11 +184,13 @@ class FlatlandEnvironment(BaseEnvironment):
         pose.y = pos[1]
         pose.theta = pos[2]
 
-        move_model_request = MoveModelRequest()
+        move_model_request = MoveModelMsg()
         move_model_request.name = self._robot_name
         move_model_request.pose = pose
 
-        self._move_model_srv(move_model_request)
+        # self._move_model_srv(move_model_request)
+
+        self._move_robot_pub.publish(move_model_request)
 
     ## HELPER FUNCTIONS TO CREATE MODEL.YAML
     def _generate_random_obstacle(
