@@ -1,9 +1,8 @@
 import numpy as np
 import random
 import math
-from nav_msgs.msg import OccupancyGrid
-from task_generator.constants import Constants
 
+from map_distance_server.srv import GetDistanceMap
 
 class MapManager:
     """
@@ -12,13 +11,16 @@ class MapManager:
     obstacle positions.
     """
 
-    def __init__(self, map: OccupancyGrid):
+    def __init__(self, map: GetDistanceMap):
         self.update_map(map)
 
-    def update_map(self, map: OccupancyGrid):
+    def update_map(self, map: GetDistanceMap):
         self.map = map
-
-        self._set_freespace_indices()
+        self.map_with_distances = np.reshape(
+            self.map.data, 
+            (self.map.info.height, self.map.info.width)
+        )
+        self.origin = map.info.origin.position
 
     def get_random_pos_on_map(self, safe_dist, forbidden_zones=None):
         """
@@ -39,83 +41,70 @@ class MapManager:
                 describing circles on the map. New
                 position should not lie on forbidden
                 zones e.g. the circles.
-
+                x, y and radius are in meters
         Returns:
             A tuple with three elements: x, y, theta
         """
-        assert len(self.free_space_indices) == 2 and len(
-            self.free_space_indices[0]
-        ) == len(
-            self.free_space_indices[1]
-        ), "free_space_indices is not correctly setup"
+        # safe_dist is in meters so at first calc safe dist to distance on
+        # map -> resolution of map is m / cell -> safe_dist in cells is
+        # safe_dist / resolution
+        safe_dist_in_cells = math.ceil(safe_dist / self.map.info.resolution) + 1
 
-        n_freespace_cells = len(self.free_space_indices[0])
-        n_check_failed = 0
-        x_in_meters, y_in_meters = None, None
-
-        while n_check_failed < 100:
-            idx = random.randint(0, n_freespace_cells - 1)
-
-            # in cells
-            y_in_cells, x_in_cells = (
-                self.free_space_indices[0][idx],
-                self.free_space_indices[1][idx],
+        forbidden_zones_in_cells = list(
+            map(
+                lambda point: [math.ceil(p / self.map.info.resolution) for p in point],
+                forbidden_zones
             )
+        )
 
-            # convert x, y in meters
-            y_in_meters = (
-                y_in_cells * self.map.info.resolution 
-                + self.map.info.origin.position.y
-            )
-            x_in_meters = (
-                x_in_cells * self.map.info.resolution 
-                + self.map.info.origin.position.x
-            )
+        # Now get index of all cells were dist is > safe_dist_in_cells
+        possible_cells = list(np.array(np.where(self.map_with_distances > safe_dist_in_cells)).transpose())
 
-            if self._is_pos_valid(x_in_meters, y_in_meters, safe_dist, forbidden_zones):
+        assert len(possible_cells) > 0, "No cells available"
+
+        # The position should not lie in the forbidden zones and keep the safe 
+        # dist to these zones as well. We could remove all cells here but since
+        # we only need one position and the amount of cells can get very high
+        # we just pick positions at random and check if the distance to all 
+        # forbidden zones is high enough
+
+        while len(possible_cells) >= 0:
+            if len(possible_cells) == 0:
+                raise Exception("can't find any non-occupied spaces")
+
+            # Select a random cell
+            x, y = possible_cells.pop(random.randint(0, len(possible_cells) - 1))
+
+            # Check if valid
+            if self._is_pos_valid(x, y, safe_dist_in_cells, forbidden_zones_in_cells):
                 break
-
-            n_check_failed += 1
-
-        if n_check_failed >= 100:
-            raise Exception("can't find any non-occupied spaces")
 
         theta = random.uniform(-math.pi, math.pi)
 
-        return x_in_meters, y_in_meters, theta
-
-    def _is_pos_valid(self, x, y, safe_dist, forbidden_zones):
-        return self._check_safe_dist(
-            x, y, safe_dist, forbidden_zones
-        ) or self._check_static_map_dist(
-            x, y, int(safe_dist / self.map.info.resolution)
+        print(
+            round(y * self.map.info.resolution + self.origin.y, 3), 
+            round(x * self.map.info.resolution + self.origin.x, 3), 
+            forbidden_zones
         )
 
-    def _check_safe_dist(self, x, y, safe_dist, forbidden_zones):
-        for zone in forbidden_zones:
-            if math.sqrt((x - zone[0]) ** 2 + (y - zone[1]) ** 2) < (
-                zone[2] + safe_dist
-            ):
-                return False
+        return (
+            round(y * self.map.info.resolution + self.origin.y, 3), 
+            round(x * self.map.info.resolution + self.origin.x, 3),
+            theta
+        )
 
-        return True
+    def _is_pos_valid(self, x, y, safe_dist, forbidden_zones):
+        if len(forbidden_zones) == 0:
+            return True
 
-    def _check_static_map_dist(self, x, y, cell_radius):
-        x_index = int((x - self.map.info.origin.position.x) // self.map.info.resolution)
-        y_index = int((y - self.map.info.origin.position.y) // self.map.info.resolution)
+        for p in forbidden_zones:
+                f_x, f_y, radius = p
 
-        for i in range(x_index - cell_radius, x_index + cell_radius, 1):
-            for j in range(y_index - cell_radius, y_index + cell_radius, 1):
-                index = j * self.map.info.width + i
+                dist = math.floor(math.sqrt(
+                    (x - f_x) ** 2 + (y - f_y) ** 2
+                ))
 
-                if len(self.map.data) <= index or self.map.data[index]:
-                    return False
+                if dist > safe_dist + radius:
+                    return True
 
-        return True
-
-    def _set_freespace_indices(self):
-        width_in_cell, height_in_cell = self.map.info.width, self.map.info.height
-
-        map_2d = np.reshape(self.map.data, (height_in_cell, width_in_cell))
-
-        self.free_space_indices = np.where(map_2d == 0)
+        return False

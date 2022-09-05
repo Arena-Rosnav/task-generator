@@ -18,22 +18,33 @@ class RandomTask(BaseTask):
 
     def reset(
         self, start=None, goal=None,
-        static_obstacles=None, dynamic_obstacles=None
+        static_obstacles=None, dynamic_obstacles=None,
     ):
         return super().reset(
             lambda: self._reset_robot_and_obstacles(
                 start=start, goal=goal,
                 static_obstacles=static_obstacles,
-                dynamic_obstacles=dynamic_obstacles
+                dynamic_obstacles=dynamic_obstacles,
             )
         )
 
     def _reset_robot_and_obstacles(
         self, start=None, goal=None, 
-        dynamic_obstacles=None, static_obstacles=None
+        dynamic_obstacles=None, static_obstacles=None,
     ):
-        start_pos, goal_pos = self.robot_manager.reset(
-            start_pos=start, goal_pos=goal)
+        robot_positions = []
+
+        for manager in self.robot_managers:
+            for pos in manager.reset(
+                forbidden_zones=robot_positions
+            ):
+                robot_positions.append(
+                    [
+                        pos[0], 
+                        pos[1], 
+                        manager.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST
+                    ]
+                )
 
         dynamic_obstacles = random.randint(
             TaskMode.Random.MIN_DYNAMIC_OBS,
@@ -47,20 +58,7 @@ class RandomTask(BaseTask):
         self.obstacles_manager.reset_random(
             dynamic_obstacles=dynamic_obstacles,
             static_obstacles=static_obstacles,
-            forbidden_zones=[
-                (
-                    start_pos[0],
-                    start_pos[1],
-                    self.robot_manager.robot_radius 
-                        + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
-                ),
-                (
-                    goal_pos[0],
-                    goal_pos[1],
-                    self.robot_manager.robot_radius 
-                        + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
-                ),
-            ]
+            forbidden_zones=robot_positions
         )
 
-        return False, goal_pos
+        return False, (0, 0, 0)

@@ -1,3 +1,6 @@
+import math
+
+
 class Constants:
     GOAL_REACHED_TOLERANCE = 1.0
     TIMEOUT = 3.0 * 60 ## 3 min
@@ -6,10 +9,20 @@ class Constants:
 
     class ObstacleManager:
         DYNAMIC_OBSTACLES = 3
-        STATIC_OBSTACLES = 0 
+        STATIC_OBSTACLES = 0
+
+        OBSTACLE_MAX_RADIUS = 0.6
 
     class RobotManager:
-        SPAWN_ROBOT_SAFE_DIST = 0.2
+        SPAWN_ROBOT_SAFE_DIST = 0.4
+
+    class Environment:
+        FLATLAND = "flatland"
+        GAZEBO = "gazebo"
+
+    class ArenaType:
+        TRAINING = "training"
+        DEPLOYMENT = "deployment"
 
 
 class TaskMode:
@@ -20,9 +33,9 @@ class TaskMode:
 
     class Random:
         MIN_DYNAMIC_OBS = 1
-        MAX_DYNAMIC_OBS = 5
+        MAX_DYNAMIC_OBS = 3
         MIN_STATIC_OBS = 1
-        MAX_STATIC_OBS = 5
+        MAX_STATIC_OBS = 3
 
     class Scenario:
         RESETS_DEFAULT = 5
@@ -48,6 +61,7 @@ class FlatlandRandomModel:
         "name": "RandomMove_Plugin",
         "body": "base_link"
     }
-    LINEAR_VEL = 0.3
-    ANGLUAR_VEL_MAX = 0.78
+    LINEAR_VEL = 0.2
+    ANGLUAR_VEL_MAX = 0.2
+
 

@@ -11,5 +11,6 @@ catkin_package()
 
 catkin_install_python(PROGRAMS
   scripts/task_generator_node.py
-   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
+
+  DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

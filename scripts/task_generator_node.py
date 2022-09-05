@@ -2,6 +2,7 @@
 
 import math
 import rospy
+import time
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Int16, Bool
 from std_srvs.srv import Empty, EmptyResponse
@@ -25,7 +26,7 @@ class TaskGenerator:
     """
 
     def __init__(self) -> None:
-
+        print("BOOTING TASK GENERATOR")
 
         ## Params
         self.task_mode = rospy.get_param("/task_mode")
@@ -36,18 +37,18 @@ class TaskGenerator:
         self.pub_scenario_finished = rospy.Publisher('scenario_finished', Bool, queue_size=10)
         
         ## Subscribers
-        rospy.Subscriber(
-            rospy.get_param("robot_odom_topic_name", "odom"), 
-            Odometry, 
-            self.robot_pos_callback
-        )
-        rospy.Subscriber(f"/move_base_simple/goal", PoseStamped, self.set_goal_callback)
+        # rospy.Subscriber(
+        #     rospy.get_param("robot_odom_topic_name", "odom"), 
+        #     Odometry, 
+        #     self.robot_pos_callback
+        # )
+        # rospy.Subscriber(f"/move_base_simple/goal", PoseStamped, self.set_goal_callback)
 
         ## Services
         rospy.Service("task_generator", Empty, self.reset_task_srv_callback)
 
-        rospy.wait_for_service("/move_base/clear_costmaps")
-        self._clear_constmaps_srv = rospy.ServiceProxy("/move_base/clear_costmaps", Empty)
+        # rospy.wait_for_service("/move_base/clear_costmaps")
+        # self._clear_constmaps_srv = rospy.ServiceProxy("/move_base/clear_costmaps", Empty)
 
         ## Vars
         self.env_wrapper = EnvironmentFactory.instantiate(Utils.get_environment())("")
@@ -63,26 +64,30 @@ class TaskGenerator:
         self.distance_to_goal = math.inf
         self.number_of_resets = 0
 
+
+        self.reset_task()
+
         ## Timers
+        # while not rospy.is_shutdown():
+        #     self.check_task_status("")
+        #     time.sleep(10)
         rospy.Timer(rospy.Duration(0.5), self.check_task_status)
 
-        self.reset_task()
 
     def check_task_status(self, _):
-        should_reset_task = False
+        # print("TIMER")
 
-        if self._get_distance_to_goal() <= Constants.GOAL_REACHED_TOLERANCE:
-            rospy.loginfo("GOAL REACHED")
-            should_reset_task = True
+        # should_reset_task = False
 
-        if rospy.get_time() > self.start_time + Constants.TIMEOUT:
-            rospy.logwarn("TIMEOUT")
-            should_reset_task = True
+        if self.task.is_done():
+            self.reset_task()
 
-        if not self.auto_reset or not should_reset_task:
-            return
+        # should_reset_task = True
 
-        self.reset_task()
+        # if not self.auto_reset or not should_reset_task:
+        #     return
+
+        # self.reset_task()
 
     def reset_task(self):
         self.start_time = rospy.get_time()
@@ -93,14 +98,14 @@ class TaskGenerator:
 
         self.env_wrapper.before_reset_task()
 
-        self._clear_constmaps_srv()
+        # self._clear_constmaps_srv()
 
         is_end, goal_position = self.task.reset()
 
         self.curr_goal_pos = goal_position
         
         self.pub_scenario_reset.publish(self.number_of_resets)
-        self._send_end_message_when_is_end(is_end)
+        self._send_end_message_on_end(is_end)
 
         self.env_wrapper.after_reset_task()
 
@@ -124,7 +129,7 @@ class TaskGenerator:
 
         return EmptyResponse()
 
-    def _send_end_message_when_is_end(self, is_end):
+    def _send_end_message_on_end(self, is_end):
         if not is_end:
             return
 
