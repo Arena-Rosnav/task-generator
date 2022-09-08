@@ -26,8 +26,6 @@ class TaskGenerator:
     """
 
     def __init__(self) -> None:
-        print("BOOTING TASK GENERATOR")
-
         ## Params
         self.task_mode = rospy.get_param("/task_mode")
         self.auto_reset = rospy.get_param("~auto_reset", True)
