@@ -57,7 +57,7 @@ class FlatlandEnvironment(BaseEnvironment):
         )
 
         self._move_robot_pub = rospy.Publisher(
-            self._ns_prefix + "/move_model", MoveModelMsg, queue_size=10
+            self._ns_prefix + "move_model", MoveModelMsg, queue_size=10
         )
 
         self._robot_name = rospy.get_param("robot_model")

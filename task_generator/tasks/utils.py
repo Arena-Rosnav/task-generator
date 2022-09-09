@@ -14,6 +14,7 @@ from task_generator.tasks.scenario import ScenarioTask
 from task_generator.tasks.staged import StagedRandomTask
 from task_generator.utils import Utils
 
+from map_distance_server.srv import GetDistanceMap
 
 def get_predefined_task(namespace, mode, environment=None, **kwargs):
     """
@@ -22,11 +23,13 @@ def get_predefined_task(namespace, mode, environment=None, **kwargs):
     if environment == None:
         environment = EnvironmentFactory.instantiate(Utils.get_environment())(namespace)
 
-    rospy.wait_for_service("/static_map")
-    service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
+    rospy.wait_for_service("/distance_map")
+
+    service_client_get_map = rospy.ServiceProxy("/distance_map", GetDistanceMap)
+
     map_response = service_client_get_map()
 
-    map_manager = MapManager(map_response.map)
+    map_manager = MapManager(map_response)
 
     robot_manager = RobotManager(namespace, map_manager, environment)
     obstacle_manager = ObstacleManager(namespace, map_manager, environment)

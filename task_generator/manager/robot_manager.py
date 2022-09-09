@@ -20,6 +20,7 @@ class RobotManager:
         self.environment.spawn_robot()
 
         self.robot_radius = rospy.get_param("robot_radius")
+        self.goal_radius = rospy.get_param("goal_radius", 0.7) + 1
 
     def reset(self, forbidden_zones=[], start_pos=None, goal_pos=None):
         """
@@ -49,11 +50,11 @@ class RobotManager:
         self.goal_pos = self._default_position(
             goal_pos,
             self.map_manager.get_random_pos_on_map(
-                3 * self.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
+                self.robot_radius + Constants.RobotManager.SPAWN_ROBOT_SAFE_DIST,
                 [
                     *forbidden_zones,
                     (
-                        self.start_pos[0], self.start_pos[1], self.robot_radius
+                        self.start_pos[0], self.start_pos[1], self.goal_radius
                     )
                 ]
             )

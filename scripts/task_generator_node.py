@@ -146,7 +146,7 @@ class TaskGenerator:
 if __name__ == "__main__":
     rospy.init_node("task_generator")
     
-    rospy.wait_for_service("/static_map")
+    rospy.wait_for_service("/distance_map")
 
     task_generator = TaskGenerator()
     

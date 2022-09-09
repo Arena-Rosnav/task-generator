@@ -30,14 +30,16 @@ class ObstacleManager:
 
         for _ in range(dynamic_obstacles):
             position = self.map_manager.get_random_pos_on_map(
-                safe_dist=1, forbidden_zones=forbidden_zones
+                safe_dist=Constants.ObstacleManager.OBSTACLE_MAX_RADIUS, 
+                forbidden_zones=forbidden_zones
             )
 
             self.environment.spawn_random_dynamic_obstacle(position=position)
         
         for _ in range(static_obstacles):
             position = self.map_manager.get_random_pos_on_map(
-                safe_dist=1, forbidden_zones=forbidden_zones
+                safe_dist=Constants.ObstacleManager.OBSTACLE_MAX_RADIUS, 
+                forbidden_zones=forbidden_zones
             )
 
             self.environment.spawn_random_static_obstacle(position=position)
