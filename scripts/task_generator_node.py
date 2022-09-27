@@ -17,15 +17,13 @@ from task_generator.environments.gazebo_environment import GazeboEnvironment
 from task_generator.environments.flatland_environment import FlatlandRandomModel
 
 
-
 class TaskGenerator:
     """
-        Task Generator Node
-        Will initialize and reset all tasks. The task to use is read from the `/task_mode` param.
+    Task Generator Node
+    Will initialize and reset all tasks. The task to use is read from the `/task_mode` param.
     """
 
     def __init__(self) -> None:
-
 
         ## Params
         self.task_mode = rospy.get_param("/task_mode")
@@ -33,28 +31,24 @@ class TaskGenerator:
 
         ## Publishers
         self.pub_scenario_reset = rospy.Publisher("scenario_reset", Int16, queue_size=1)
-        self.pub_scenario_finished = rospy.Publisher('scenario_finished', Bool, queue_size=10)
-        
+        self.pub_scenario_finished = rospy.Publisher(
+            "scenario_finished", Bool, queue_size=10
+        )
+
         ## Subscribers
         rospy.Subscriber(
-            rospy.get_param("robot_odom_topic_name", "odom"), 
-            Odometry, 
-            self.robot_pos_callback
+            rospy.get_param("robot_odom_topic_name", "odom"),
+            Odometry,
+            self.robot_pos_callback,
         )
         rospy.Subscriber(f"/move_base_simple/goal", PoseStamped, self.set_goal_callback)
-
-        ## Services
-        rospy.Service("task_generator", Empty, self.reset_task_srv_callback)
-
-        rospy.wait_for_service("/move_base/clear_costmaps")
-        self._clear_constmaps_srv = rospy.ServiceProxy("/move_base/clear_costmaps", Empty)
 
         ## Vars
         self.env_wrapper = EnvironmentFactory.instantiate(Utils.get_environment())("")
 
         rospy.loginfo(f"Launching task mode: {self.task_mode}")
 
-        self.start_time = rospy.get_time() 
+        self.start_time = rospy.get_time()
         self.task = get_predefined_task("", self.task_mode, self.env_wrapper)
 
         self.first_round = True
@@ -62,6 +56,14 @@ class TaskGenerator:
         self.curr_robot_pos = None
         self.distance_to_goal = math.inf
         self.number_of_resets = 0
+
+        ## Services
+        rospy.Service("task_generator", Empty, self.reset_task_srv_callback)
+
+        rospy.wait_for_service("/move_base/clear_costmaps")
+        self._clear_constmaps_srv = rospy.ServiceProxy(
+            "/move_base/clear_costmaps", Empty
+        )
 
         ## Timers
         rospy.Timer(rospy.Duration(0.5), self.check_task_status)
@@ -98,7 +100,7 @@ class TaskGenerator:
         is_end, goal_position = self.task.reset()
 
         self.curr_goal_pos = goal_position
-        
+
         self.pub_scenario_reset.publish(self.number_of_resets)
         self._send_end_message_when_is_end(is_end)
 
@@ -138,16 +140,16 @@ class TaskGenerator:
             return math.inf
 
         return math.sqrt(
-            (self.curr_robot_pos.x - self.curr_goal_pos[0]) ** 2 
+            (self.curr_robot_pos.x - self.curr_goal_pos[0]) ** 2
             + (self.curr_robot_pos.y - self.curr_goal_pos[1]) ** 2
         )
 
 
 if __name__ == "__main__":
     rospy.init_node("task_generator")
-    
+
     rospy.wait_for_service("/static_map")
 
     task_generator = TaskGenerator()
-    
+
     rospy.spin()
