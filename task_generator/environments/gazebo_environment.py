@@ -8,7 +8,12 @@ from std_srvs.srv import Empty, Trigger
 from task_generator.environments.environment_factory import EnvironmentFactory
 from tf.transformations import quaternion_from_euler
 
+from ..constants import Constants
 from .base_environment import BaseEnvironment
+from .environment_factory import EnvironmentFactory
+
+
+T = Constants.WAIT_FOR_SERVICE_TIMEOUT
 
 
 @EnvironmentFactory.register("gazebo")
@@ -29,14 +34,20 @@ class GazeboEnvironment(BaseEnvironment):
         self._robot_radius = rospy.get_param("robot_radius")
         self._robot_description = rospy.get_param("robot_description")
 
-        rospy.wait_for_service("/gazebo/spawn_urdf_model")
-        rospy.wait_for_service("/gazebo/set_model_state")
+        rospy.wait_for_service("/gazebo/spawn_urdf_model", timeout=T)
+        rospy.wait_for_service("/gazebo/set_model_state", timeout=T)
+        rospy.wait_for_service(
+            f"{self._ns_prefix}pedsim_simulator/spawn_peds", timeout=T
+        )
+        rospy.wait_for_service(
+            f"{self._ns_prefix}pedsim_simulator/reset_all_peds", timeout=T
+        )
 
         self._spawn_model_srv = rospy.ServiceProxy(
             "/gazebo/spawn_urdf_model", SpawnModel
         )
         self._move_model_srv = rospy.ServiceProxy(
-            "/gazebo/set_model_state", SetModelState
+            "/gazebo/set_model_state", SetModelState, persistent=True
         )
 
         self._spawn_peds_srv = rospy.ServiceProxy(
@@ -58,6 +69,13 @@ class GazeboEnvironment(BaseEnvironment):
 
     def remove_all_obstacles(self):
         pass
+
+    def spawn_pedsim_agents(self, agents):
+        peds = [agent.getPedMsg() for agent in agents]
+        self._spawn_peds_srv(peds)
+
+    def reset_pedsim_agents(self):
+        self._reset_peds_srv()
 
     def spawn_random_dynamic_obstacle(self, **args):
         pass
