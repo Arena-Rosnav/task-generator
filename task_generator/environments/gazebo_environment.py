@@ -77,6 +77,9 @@ class GazeboEnvironment(BaseEnvironment):
     def reset_pedsim_agents(self):
         self._reset_peds_srv()
 
+    def spawn_obstacle(self, position, yaml_path=""):
+        pass
+
     def spawn_random_dynamic_obstacle(self, **args):
         pass
 
