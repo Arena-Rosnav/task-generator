@@ -11,7 +11,7 @@ class Constants:
         OBSTACLE_MAX_RADIUS = 0.6
     
     class RobotManager:
-        SPAWN_ROBOT_SAFE_DIST = 0.4
+        SPAWN_ROBOT_SAFE_DIST = 0.8
 
 
 class TaskMode:

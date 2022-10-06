@@ -14,10 +14,6 @@ class BaseTask():
         self.robot_manager = robot_manager
         self.map_manager = map_manager
         
-        self._service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
-
-        rospy.Subscriber("/map", OccupancyGrid, self._update_map)
-
     def reset(self, callback):
         """
             Calls a passed reset function (usually the tasks own reset)
@@ -42,6 +38,3 @@ class BaseTask():
             raise Exception("reset error!")
 
         return return_val
-
-    def _update_map(self, map):
-        self.map_manager.update_map(map)

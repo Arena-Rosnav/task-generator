@@ -48,6 +48,8 @@ class StagedRandomTask(RandomTask):
 
         self._init_debug_mode(paths)
 
+        print("NAMESPACE PREFIX", self.namespace_prefix)
+
         self._sub_next = rospy.Subscriber(
             f"{self.namespace_prefix}next_stage", Bool, self.next_stage
         )
