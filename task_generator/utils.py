@@ -1,7 +1,6 @@
 import rospy
-import os
+
 
 class Utils:
     def get_environment():
-        return os.getenv("ENVIRONMENT", "flatland").lower()
-
+        return rospy.get_param("environment", "flatland")
