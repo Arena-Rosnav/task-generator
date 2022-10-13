@@ -1,0 +1,5 @@
+robots:
+  - model: rto
+    planner: rosnav
+    amount: 6
+    agent: rto_tlabs

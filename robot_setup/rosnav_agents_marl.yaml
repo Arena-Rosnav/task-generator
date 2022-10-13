@@ -1,0 +1,17 @@
+robots:
+  # - model: ridgeback
+  #   planner: rosnav
+  #   amount: 1
+  #   agent: ridgeback_marl
+  - model: rto
+    planner: rosnav
+    amount: 3
+    agent: rto_tlabs_marl
+  # - model: jackal
+  #   planner: rosnav
+  #   amount: 1
+  #   agent: jackal_marl
+  # - model: jackal
+  #   planner: rosnav
+  #   amount: 1
+  #   agent: new_jackal

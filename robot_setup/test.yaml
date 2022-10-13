@@ -1,7 +1,0 @@
-robots:
-  - model: burger
-    planner: teb
-    amount: 1
-  - model: jackal
-    planner: teb
-    amount: 1

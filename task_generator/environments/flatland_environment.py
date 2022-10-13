@@ -203,13 +203,13 @@ class FlatlandEnvironment(BaseEnvironment):
         pose.y = pos[1]
         pose.theta = pos[2]
 
-        move_model_request = MoveModelMsg()
+        move_model_request = MoveModelRequest()
         move_model_request.name = name if name else self._robot_name
         move_model_request.pose = pose
 
-        # self._move_model_srv(move_model_request)
+        self._move_model_srv(move_model_request)
 
-        self._move_robot_pub.publish(move_model_request)
+        # self._move_robot_pub.publish(move_model_request)
 
     ## HELPER FUNCTIONS TO CREATE MODEL.YAML
     def _generate_random_obstacle(

@@ -85,7 +85,7 @@ class TaskGenerator:
         return EmptyResponse()
 
     def _send_end_message_on_end(self, is_end):
-        if not is_end:
+        if not is_end or self.task_mode != TaskMode.SCENARIO:
             return
 
         rospy.loginfo("Shutting down. All tasks completed")

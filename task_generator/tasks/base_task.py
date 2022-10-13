@@ -1,3 +1,4 @@
+from abc import abstractmethod
 import rospy
 
 from rosgraph_msgs.msg import Clock
@@ -19,6 +20,12 @@ class BaseTask():
         rospy.Subscriber("/clock", Clock, self.clock_callback)
         self.last_reset_time = 0
         self.clock = Clock()
+
+        self._set_up_robot_managers()
+
+    def _set_up_robot_managers(self):
+        for manager in self.robot_managers:
+            manager.set_up_robot()
         
     def reset(self, callback):
         """

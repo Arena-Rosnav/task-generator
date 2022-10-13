@@ -4,6 +4,7 @@ import roslaunch
 import rospkg
 import os
 import yaml
+import time
 import math
 
 from nav_msgs.msg import Odometry
@@ -39,22 +40,7 @@ class RobotManager:
 
         self.robot_setup = robot_setup
 
-        # self.set_up_robot(robot_setup)
-
-        # self.environment.spawn_robot()
-
-        # self.robot_radius = rospy.get_param("robot_radius")
-        # self.goal_radius = rospy.get_param("goal_radius", 0.7) + 1
-
-    def set_up_robot(self):
-        if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
-            self.robot_radius = rospy.get_param("robot_radius")
-            self.goal_radius = rospy.get_param("goal_radius", 0.7) + 1
-
-            return
-
-        print(self.robot_setup)
-
+    def set_up_robot(self, launch_robot_controller=True):
         base_model_path = os.path.join(
             rospkg.RosPack().get_path("arena-simulation-setup"),
             "robot",
@@ -66,20 +52,18 @@ class RobotManager:
             self.robot_setup["model"] + ".model.yaml"
         )
 
-        self.launch_robot(self.robot_setup)
+        if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
+            self.robot_radius = rospy.get_param("robot_radius")
 
         file_content = self.update_plugin_topics(
             self.read_yaml(yaml_path), 
             self.namespace
         )
 
-        self.robot_radius = rospy.get_param(
-            os.path.join(
-                self.namespace, "robot_radius"
-            )
-        )
+        self.environment.spawn_robot(self.namespace, yaml.dump(file_content), self._robot_name())
 
-        self.environment.spawn_robot(self.namespace, yaml.dump(file_content), self.namespace)
+        self.move_base_goal_pub = rospy.Publisher(os.path.join(self.namespace, "move_base_simple", "goal"), PoseStamped, queue_size=10)
+        self.pub_goal_timer = rospy.Timer(rospy.Duration(0.25), self.publish_goal_periodically)
 
         rospy.Subscriber(
             os.path.join(self.namespace, "odom"), 
@@ -87,33 +71,31 @@ class RobotManager:
             self.robot_pos_callback
         )
 
-        self.goal_pub = rospy.Publisher(os.path.join(self.namespace, "move_base_simple", "goal"), PoseStamped, queue_size=10)
-        
-        # Overwrite default move base params
-        rospy.set_param(
-            os.path.join(self.namespace, "move_base", "global_costmap", "robot_base_frame"),
-            (self.namespace).replace("/", "") + "_base_footprint"
-        )
-        rospy.set_param(
-            os.path.join(self.namespace, "move_base", "local_costmap", "robot_base_frame"),
-            (self.namespace).replace("/", "") + "_base_footprint"
-        )
-        rospy.set_param(
-            os.path.join(self.namespace, "move_base", "local_costmap", "scan", "sensor_frame"),
-            (self.namespace).replace("/", "") + "_laser_link"
-        )
-        rospy.set_param(
-            os.path.join(self.namespace, "move_base", "global_costmap", "scan", "sensor_frame"),
-            (self.namespace).replace("/", "") + "_laser_link"
+        if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
+            return
+
+        if not launch_robot_controller:
+            return
+
+        self.launch_robot(self.robot_setup)
+
+        self.robot_radius = rospy.get_param(
+            os.path.join(
+                self.namespace, "robot_radius"
+            )
         )
 
-        rospy.wait_for_service(os.path.join(self.namespace, "move_base", "clear_costmaps"))
+        # rospy.wait_for_service(os.path.join(self.namespace, "move_base", "clear_costmaps"))
         self._clear_costmaps_srv = rospy.ServiceProxy(
             os.path.join(self.namespace, "move_base", "clear_costmaps"), 
             Empty
         )
-        
 
+    def _robot_name(self):
+        if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
+            return ""
+
+        return self.namespace
 
     def reset(self, forbidden_zones=[], start_pos=None, goal_pos=None):
         """
@@ -122,11 +104,6 @@ class RobotManager:
             move base and rviz and moves the robot to
             the start position.
         """
-        try:
-            self._clear_costmaps_srv()
-        except:
-            traceback.print_exc()
-
         self.start_pos, self.goal_pos = self.generate_new_start_and_goal(
             forbidden_zones, start_pos, goal_pos
         )
@@ -136,7 +113,18 @@ class RobotManager:
 
         self.set_is_goal_goached(self.start_pos, self.goal_pos)
 
+        time.sleep(0.1)
+
+        try:
+            self._clear_costmaps_srv()
+        except:
+            pass
+
         return self.start_pos, self.goal_pos
+
+    def publish_goal_periodically(self, _):
+        if self.goal_pos != None:
+            self.publish_goal(self.goal_pos)
 
     def generate_new_start_and_goal(self, forbidden_zones, start_pos, goal_pos):
         new_start_pos = self._default_position(
@@ -165,8 +153,6 @@ class RobotManager:
         return new_start_pos, new_goal_pos
 
     def publish_goal(self, goal):
-        # if not self.goal_pos == None:
-        #     self.environment.publish_goal(self.goal_pos)
         goal_msg = PoseStamped()
         goal_msg.header.seq = 0
         goal_msg.header.stamp = rospy.get_rostime()
@@ -179,15 +165,13 @@ class RobotManager:
         goal_msg.pose.orientation.y = 0
         goal_msg.pose.orientation.z = 1
 
-        self.goal_pub.publish(goal_msg)
+        self.move_base_goal_pub.publish(goal_msg)
 
     def move_robot_to_start(self):
         if not self.start_pos == None:
             self.move_robot_to_pos(self.start_pos)
 
     def move_robot_to_pos(self, pos):
-        print(pos)
-
         self.environment.move_robot(pos, name=self.namespace)
 
     def _default_position(self, pos, callback_pos):
@@ -215,11 +199,32 @@ class RobotManager:
 
         self.process.start()
 
+        # Overwrite default move base params
+        rospy.set_param(
+            os.path.join(self.namespace, "move_base", "global_costmap", "robot_base_frame"),
+            (self.namespace).replace("/", "") + "_base_footprint"
+        )
+        rospy.set_param(
+            os.path.join(self.namespace, "move_base", "local_costmap", "robot_base_frame"),
+            (self.namespace).replace("/", "") + "_base_footprint"
+        )
+        rospy.set_param(
+            os.path.join(self.namespace, "move_base", "local_costmap", "scan", "sensor_frame"),
+            (self.namespace).replace("/", "") + "_laser_link"
+        )
+        rospy.set_param(
+            os.path.join(self.namespace, "move_base", "global_costmap", "scan", "sensor_frame"),
+            (self.namespace).replace("/", "") + "_laser_link"
+        )
+
     def read_yaml(self, yaml_path):
         with open(yaml_path, "r") as file:
             return yaml.safe_load(file)
         
     def update_plugin_topics(self, file_content, namespace):
+        if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
+            return file_content
+
         plugins = file_content["plugins"]
 
         for plugin in plugins:

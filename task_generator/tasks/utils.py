@@ -3,7 +3,6 @@ import rospy
 import rospkg
 import yaml
 import os
-import roslaunch
 from task_generator.constants import Constants
 
 from task_generator.environments.environment_factory import EnvironmentFactory
@@ -34,11 +33,6 @@ def get_predefined_task(namespace, mode, environment=None, **kwargs):
 
     service_client_get_map = rospy.ServiceProxy("/distance_map", GetDistanceMap)
 
-
-    # rospy.wait_for_service("/static_map")
-
-    # service_client_get_map = rospy.ServiceProxy("/static_map", GetMap)
-
     map_response = service_client_get_map()
 
     map_manager = MapManager(map_response)
@@ -50,10 +44,6 @@ def get_predefined_task(namespace, mode, environment=None, **kwargs):
     # - Create a unique namespace name
     # - Create a robot manager
     # - Launch the robot.launch file
-
-    # return
-
-    # robot_manager = RobotManager(namespace, map_manager, environment)
 
     task = TaskFactory.instantiate(
         mode,
@@ -68,18 +58,16 @@ def get_predefined_task(namespace, mode, environment=None, **kwargs):
 
 def create_robot_managers(namespace, map_manager, environment):
     # Read robot setup file
-    robot_setup_file = rospy.get_param('/robot_setup_file')
+    robot_setup_file = rospy.get_param('/robot_setup_file', "")
 
     if robot_setup_file == "":
         robots = create_default_robot_list(
             rospy.get_param("/model"),
-            rospy.get_param("/local_planner"),
+            rospy.get_param("/local_planner", ""),
             rospy.get_param("/agent_name", "")
         )
     else:
         robots = read_robot_setup_file(robot_setup_file)
-
-    print(robots)
 
     if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
         return [RobotManager(namespace, map_manager, environment, robots[0])]
@@ -89,38 +77,12 @@ def create_robot_managers(namespace, map_manager, environment):
     for robot in robots:
         amount = robot["amount"]
 
-        print(robot, robot['model'])
-
         for r in range(0, amount):
             name = f"{robot['model']}_{r}_{len(robot_managers)}"  
 
             robot_managers.append(
                 RobotManager(namespace + "/" + name, map_manager, environment, robot)
             )
-
-            # roslaunch_file = roslaunch.rlutil.resolve_launch_arguments(
-            #     ["arena_bringup", "robot.launch"]
-            # )
-
-            # args = [
-            #     f"model:={robot['model']}",
-            #     f"local_planner:={robot['planner']}",
-            #     f"namespace:={name}",
-            #     *([f"agent_name:={robot.get('agent')}"] if robot.get('agent') else [])
-            # ]
-
-            # print(roslaunch_file)
-
-            # launch = roslaunch.parent.ROSLaunchParent(
-            #     roslaunch.rlutil.get_or_generate_uuid(None, False),
-            #     [(*roslaunch_file, args)]
-            # )
-
-            # launch.start()
-
-            # robot_managers.append(0)
-            
-    print("CREATED ALL ROBOTS")
 
     return robot_managers
 

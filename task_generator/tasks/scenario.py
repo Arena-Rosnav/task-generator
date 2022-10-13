@@ -18,15 +18,15 @@ class ScenarioTask(BaseTask):
         map_manager,
         **kwargs
     ):
-        super().__init__(obstacles_manager, robot_managers, map_manager, **kwargs)
-
         scenario_file_path = rospy.get_param("~scenario_json_path")
 
         self.scenario_file = self.read_scenario_file(scenario_file_path)
 
+        super().__init__(obstacles_manager, robot_managers, map_manager, **kwargs)
+
         self._check_map_paths()
 
-        self._set_up_robot_managers()
+        # self._set_up_robot_managers()
 
         self.reset_count = 0
         
@@ -80,8 +80,6 @@ class ScenarioTask(BaseTask):
             rospy.signal_shutdown("Map path of scenario and static map are not the same.")
 
     def _reset_robots(self):
-        print(self.robot_managers)
-
         for index, robot in enumerate(self.scenario_file["robots"]):
             if len(self.robot_managers) <= index:
                 break
@@ -90,13 +88,10 @@ class ScenarioTask(BaseTask):
 
             manager.reset(start_pos=robot["start"], goal_pos=robot["goal"])
 
-            print(robot)
-
     def _set_up_robot_managers(self):
         self._check_robot_manager_length()
 
-        for manager in self.robot_managers:
-            manager.set_up_robot()
+        super()._set_up_robot_managers()
 
     def _check_robot_manager_length(self):
         scenario_robots_length = len(self.scenario_file["robots"])
