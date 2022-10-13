@@ -1,5 +1,5 @@
 import rospy
-from std_msgs.msg import Empty
+from std_srvs.srv import Empty
 from task_generator.environments.environment_factory import EnvironmentFactory
 
 from .base_environment import BaseEnvironment
@@ -8,7 +8,7 @@ from .base_environment import BaseEnvironment
 @EnvironmentFactory.register("gazebo")
 class GazeboEnvironment(BaseEnvironment):
     def __init__(self, namespace):
-        super().__init__()
+        super().__init__(namespace)
 
         self.unpause = rospy.ServiceProxy('/gazebo/unpause_physics', Empty)
         self.pause = rospy.ServiceProxy('/gazebo/pause_physics', Empty)

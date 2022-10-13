@@ -6,6 +6,7 @@ import numpy as np
 import os
 import yaml
 import math
+import time
 import random
 from flatland_msgs.srv import (
     DeleteModelRequest,
@@ -17,6 +18,7 @@ from flatland_msgs.srv import (
 )
 from flatland_msgs.msg import MoveModelMsg
 from pedsim_srvs.srv import SpawnPeds
+from task_generator.manager.pedsim_manager import PedsimManager
 
 from ..constants import Constants, FlatlandRandomModel
 from .base_environment import BaseEnvironment
@@ -53,11 +55,11 @@ class FlatlandEnvironment(BaseEnvironment):
             f"{self._ns_prefix}goal", PoseStamped, queue_size=1, latch=True
         )
         self._move_base_goal_pub = rospy.Publisher(
-            "/move_base_simple/goal", PoseStamped, queue_size=1, latch=True
+            f"{self._ns_prefix}move_base_simple/goal", PoseStamped, queue_size=1, latch=True
         )
 
         self._move_robot_pub = rospy.Publisher(
-            self._ns_prefix + "/move_model", MoveModelMsg, queue_size=10
+            self._ns_prefix + "move_model", MoveModelMsg, queue_size=10
         )
 
         self._robot_name = rospy.get_param("robot_model")
@@ -76,6 +78,9 @@ class FlatlandEnvironment(BaseEnvironment):
         )
         self._spawn_model_srv = rospy.ServiceProxy(
             f"{self._ns_prefix}spawn_model", SpawnModel
+        )
+        self._spawn_model_from_string_srv = rospy.ServiceProxy(
+            f"{self._ns_prefix}spawn_model_from_string", SpawnModel
         )
         self._delete_model_srv = rospy.ServiceProxy(
             f"{self._ns_prefix}delete_model", DeleteModel
@@ -110,8 +115,11 @@ class FlatlandEnvironment(BaseEnvironment):
 
         self._delete_model_srv(delete_model_request)
 
-    def spawn_pedsim_agents(self, agents):
-        peds = [agent.getPedMsg() for agent in agents]
+    def spawn_pedsim_agents(self, dynamic_obstacles):
+        peds = [
+            PedsimManager.create_pedsim_msg(agent) 
+            for agent in dynamic_obstacles
+        ]
 
         self._spawn_peds_srv(peds)
 
@@ -140,18 +148,26 @@ class FlatlandEnvironment(BaseEnvironment):
             self._obstacles_amount
         )
 
-        model_path = self._create_obstacle_yaml(model, obstacle_name)
-
-        self._spawn_model(model_path, obstacle_name, self._namespace, position)
+        self._spawn_model(
+            yaml.dump(model), 
+            obstacle_name, 
+            self._namespace, 
+            position, 
+            srv=self._spawn_model_from_string_srv
+        )
 
         self._obstacles_amount += 1 
 
-    def spawn_robot(self):
+    def spawn_robot(self, name, robot_file, namespace_appendix=None):
         self._spawn_model(
-            self._robot_yaml_path, self._robot_name, self._namespace, [0, 0, 0]
+            robot_file, 
+            name, 
+            os.path.join(self._namespace, namespace_appendix), 
+            [0, 0, 0],
+            srv=self._spawn_model_from_string_srv
         )
 
-    def _spawn_model(self, yaml_path, name, namespace, position):
+    def _spawn_model(self, yaml_path, name, namespace, position, srv=None):
         request = SpawnModelRequest()
         request.yaml_path = yaml_path
         request.name = name
@@ -160,7 +176,10 @@ class FlatlandEnvironment(BaseEnvironment):
         request.pose.y = position[1]
         request.pose.theta = position[2]
 
-        self._spawn_model_srv(request)
+        if srv == None:
+            srv = self._spawn_model_srv
+
+        srv(request)
 
     def publish_goal(self, goal):
         goal_msg = PoseStamped()
@@ -178,19 +197,19 @@ class FlatlandEnvironment(BaseEnvironment):
         self._goal_pub.publish(goal_msg)
         self._move_base_goal_pub.publish(goal_msg)
 
-    def move_robot(self, pos):
+    def move_robot(self, pos, name=None):
         pose = Pose2D()
         pose.x = pos[0]
         pose.y = pos[1]
         pose.theta = pos[2]
 
-        move_model_request = MoveModelMsg()
-        move_model_request.name = self._robot_name
+        move_model_request = MoveModelRequest()
+        move_model_request.name = name if name else self._robot_name
         move_model_request.pose = pose
 
-        # self._move_model_srv(move_model_request)
+        self._move_model_srv(move_model_request)
 
-        self._move_robot_pub.publish(move_model_request)
+        # self._move_robot_pub.publish(move_model_request)
 
     ## HELPER FUNCTIONS TO CREATE MODEL.YAML
     def _generate_random_obstacle(
@@ -218,14 +237,14 @@ class FlatlandEnvironment(BaseEnvironment):
             **self._generate_random_footprint_type(min_radius, max_radius)
         }
 
-        body["footprints"].append(footprint)
+        body["footprints"] = [footprint]
 
         model = {'bodies': [body], "plugins": []}
 
         if is_dynamic:
             model['plugins'].append({
                 **FlatlandRandomModel.RANDOM_MOVE_PLUGIN,
-                'linear_velocity': linear_vel,
+                'linear_velocity': random.uniform(0, linear_vel),
                 'angular_velocity_max': angular_vel_max
             })
 

@@ -1,28 +1,37 @@
 class Constants:
     GOAL_REACHED_TOLERANCE = 1.0
-    TIMEOUT = 3.0 * 60 ## 3 min
+    TIMEOUT = 5.0 * 60 ## 3 min
     WAIT_FOR_SERVICE_TIMEOUT = 5 # 5 secs
     MAX_RESET_FAIL_TIMES = 3
 
     class ObstacleManager:
         DYNAMIC_OBSTACLES = 3
-        STATIC_OBSTACLES = 0 
+        STATIC_OBSTACLES = 0
+
+        OBSTACLE_MAX_RADIUS = 0.6
 
     class RobotManager:
-        SPAWN_ROBOT_SAFE_DIST = 0.2
+        SPAWN_ROBOT_SAFE_DIST = 0.4
+
+    class Environment:
+        FLATLAND = "flatland"
+        GAZEBO = "gazebo"
+
+    class ArenaType:
+        TRAINING = "training"
+        DEPLOYMENT = "deployment"
 
 
 class TaskMode:
     RANDOM = "random"
     STAGED = "staged"
     SCENARIO = "scenario"
-    MANUAL = "manual"
 
     class Random:
         MIN_DYNAMIC_OBS = 1
-        MAX_DYNAMIC_OBS = 5
+        MAX_DYNAMIC_OBS = 3
         MIN_STATIC_OBS = 1
-        MAX_STATIC_OBS = 5
+        MAX_STATIC_OBS = 3
 
     class Scenario:
         RESETS_DEFAULT = 5
@@ -48,6 +57,31 @@ class FlatlandRandomModel:
         "name": "RandomMove_Plugin",
         "body": "base_link"
     }
-    LINEAR_VEL = 0.3
-    ANGLUAR_VEL_MAX = 0.78
+    LINEAR_VEL = 0.2
+    ANGLUAR_VEL_MAX = 0.2
 
+
+class Pedsim:
+    START_UP_MODE = "default"
+    WAIT_TIME = 0.0
+    TRIGGER_ZONE_RADIUS = 0.0
+    CHATTING_PROBABILITY = 0.0
+    TELL_STORY_PROBABILITY = 0.0
+    GROUP_TALKING_PROBABILITY = 0.0
+    TALKING_AND_WALKING_PROBABILITY = 0.0
+    REQUESTING_SERVICE_PROBABILITY = 0.0
+    REQUESTING_GUIDE_PROBABILITY = 0.0
+    REQUESTING_FOLLOWER_PROBABILITY = 0.0
+    MAX_TALKING_DISTANCE = 5.0
+    MAX_SERVICING_RADIUS = 5.0
+    TALKING_BASE_TIME = 10.0
+    TELL_STORY_BASE_TIME = 0.0
+    GROUP_TALKING_BASE_TIME = 10.0
+    TALKING_AND_WALKING_BASE_TIME = 6.0
+    RECEIVING_SERVICE_BASE_TIME = 20.0
+    REQUESTING_SERVICE_BASE_TIME = 30.0
+    FORCE_FACTOR_DESIRED = 1.0
+    FORCE_FACTOR_OBSTACLE = 1.0
+    FORCE_FACTOR_SOCIAL = 5.0
+    FORCE_FACTOR_ROBOT = 0.0
+    WAYPOINT_MODE = 0

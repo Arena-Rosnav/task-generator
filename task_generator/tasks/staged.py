@@ -127,7 +127,7 @@ class StagedRandomTask(RandomTask):
     def reset(self):
         super().reset(
             static_obstacles=self._stages[self._curr_stage]["static"],
-            dynamic_obstacles=self._stages[self._curr_stage]["dynamic"]
+            dynamic_obstacles=self._stages[self._curr_stage]["dynamic"],
         )
 
     def _reset_robot_and_obstacles(
@@ -138,6 +138,10 @@ class StagedRandomTask(RandomTask):
             dynamic_obstacles=dynamic_obstacles,
             **kwargs
         )
+    
+    def _set_up_robot_managers(self):
+        for manager in self.robot_managers:
+            manager.set_up_robot(launch_robot_controller=False)
 
     def _init_stage(self, stage):
         static_obstacles = self._stages[stage]["static"]
