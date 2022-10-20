@@ -18,7 +18,6 @@ from task_generator.environments.gazebo_environment import GazeboEnvironment
 from task_generator.environments.flatland_environment import FlatlandRandomModel
 
 
-
 class TaskGenerator:
     """
         Task Generator Node
@@ -35,7 +34,7 @@ class TaskGenerator:
         self.pub_scenario_finished = rospy.Publisher('scenario_finished', Bool, queue_size=10)
         
         ## Services
-        rospy.Service("task_generator", Empty, self.reset_task_srv_callback)
+        rospy.Service("reset_task", Empty, self.reset_task_srv_callback)
 
         ## Vars
         self.env_wrapper = EnvironmentFactory.instantiate(Utils.get_environment())("")
