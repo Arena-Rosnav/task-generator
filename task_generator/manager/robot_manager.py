@@ -21,11 +21,6 @@ class RobotManager:
         position of a robot for all task modes.
     """
 
-    PLUGIN_PROPS_TO_EXTEND = {
-        "DiffDrive": ["odom_pub", "twist_sub"],
-        "Laser": ["topic"] 
-    }
-
     def __init__(self, namespace, map_manager, environment, robot_setup):
         self.namespace = namespace
         self.namespace_prefix = "" if namespace == "" else "/" + namespace + "/"
@@ -41,26 +36,10 @@ class RobotManager:
         self.robot_setup = robot_setup
 
     def set_up_robot(self, launch_robot_controller=True):
-        base_model_path = os.path.join(
-            rospkg.RosPack().get_path("arena-simulation-setup"),
-            "robot",
-            self.robot_setup["model"]
-        )
-
-        yaml_path = os.path.join(
-            base_model_path,
-            self.robot_setup["model"] + ".model.yaml"
-        )
-
         if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
             self.robot_radius = rospy.get_param("robot_radius")
 
-        file_content = self.update_plugin_topics(
-            self.read_yaml(yaml_path), 
-            self.namespace
-        )
-
-        self.environment.spawn_robot(self.namespace, yaml.dump(file_content), self._robot_name())
+        self.environment.spawn_robot(self.namespace, self.robot_setup["model"], self._robot_name())
 
         self.move_base_goal_pub = rospy.Publisher(os.path.join(self.namespace, "move_base_simple", "goal"), PoseStamped, queue_size=10)
         self.pub_goal_timer = rospy.Timer(rospy.Duration(0.25), self.publish_goal_periodically)
@@ -216,25 +195,6 @@ class RobotManager:
             os.path.join(self.namespace, "move_base", "global_costmap", "scan", "sensor_frame"),
             (self.namespace).replace("/", "") + "_laser_link"
         )
-
-    def read_yaml(self, yaml_path):
-        with open(yaml_path, "r") as file:
-            return yaml.safe_load(file)
-        
-    def update_plugin_topics(self, file_content, namespace):
-        if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
-            return file_content
-
-        plugins = file_content["plugins"]
-
-        for plugin in plugins:
-            if RobotManager.PLUGIN_PROPS_TO_EXTEND.get(plugin["type"]):
-                prop_names = RobotManager.PLUGIN_PROPS_TO_EXTEND.get(plugin["type"])
-
-                for name in prop_names:
-                    plugin[name] = os.path.join(namespace, plugin[name])
-
-        return file_content
 
     def robot_pos_callback(self, data):
         current_position = data.pose.pose.position

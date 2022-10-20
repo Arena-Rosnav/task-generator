@@ -3,3 +3,7 @@ robots:
     planner: rosnav
     amount: 6
     agent: rto_tlabs
+  - model: jackal
+    planner: rosnav
+    amount: 6
+    agent: new_jackal
