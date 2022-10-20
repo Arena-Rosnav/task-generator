@@ -53,7 +53,7 @@ class BaseEnvironment:
         """
         raise NotImplementedError()
 
-    def move_robot(self, pos):
+    def move_robot(self, pos, name=None):
         """
         Move the robot to the given position. 
         """
