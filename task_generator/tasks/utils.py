@@ -36,6 +36,9 @@ def get_predefined_task(namespace, mode, environment=None, **kwargs):
     map_response = service_client_get_map()
 
     map_manager = MapManager(map_response)
+
+    environment.map_manager = map_manager
+
     obstacle_manager = ObstacleManager(namespace, map_manager, environment)
 
     robot_managers = create_robot_managers(namespace, map_manager, environment)

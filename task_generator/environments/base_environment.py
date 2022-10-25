@@ -1,6 +1,10 @@
+import os
+
+
 class BaseEnvironment:
     def __init__(self, namespace):
-        pass
+        self._namespace = namespace
+        self._ns_prefix = lambda *topic: os.path.join(self._namespace, *topic)
 
     def before_reset_task(self):
         """

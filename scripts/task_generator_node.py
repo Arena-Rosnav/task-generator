@@ -53,8 +53,6 @@ class TaskGenerator:
 
 
     def check_task_status(self, _):
-        ## TODO CHECK IF END AND DONT RESET THEN
-
         if self.task.is_done():
             self.reset_task()
 
@@ -95,8 +93,6 @@ class TaskGenerator:
 
 if __name__ == "__main__":
     rospy.init_node("task_generator")
-
-    rospy.wait_for_service("/static_map")
 
     task_generator = TaskGenerator()
 

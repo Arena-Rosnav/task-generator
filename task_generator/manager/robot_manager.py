@@ -24,6 +24,9 @@ class RobotManager:
     def __init__(self, namespace, map_manager, environment, robot_setup):
         self.namespace = namespace
         self.namespace_prefix = "" if namespace == "" else "/" + namespace + "/"
+        self.ns_prefix = lambda *topic: os.path.join(self.namespace, *topic)
+
+
         self.map_manager = map_manager
         self.environment = environment
 
@@ -41,7 +44,7 @@ class RobotManager:
 
         self.environment.spawn_robot(self.namespace, self.robot_setup["model"], self._robot_name())
 
-        self.move_base_goal_pub = rospy.Publisher(os.path.join(self.namespace, "move_base_simple", "goal"), PoseStamped, queue_size=10)
+        self.move_base_goal_pub = rospy.Publisher(self.ns_prefix(self.namespace, "move_base_simple", "goal"), PoseStamped, queue_size=10)
         self.pub_goal_timer = rospy.Timer(rospy.Duration(0.25), self.publish_goal_periodically)
 
         rospy.Subscriber(
@@ -66,7 +69,7 @@ class RobotManager:
 
         # rospy.wait_for_service(os.path.join(self.namespace, "move_base", "clear_costmaps"))
         self._clear_costmaps_srv = rospy.ServiceProxy(
-            os.path.join(self.namespace, "move_base", "clear_costmaps"), 
+            self.ns_prefix(self.namespace, "move_base", "clear_costmaps"), 
             Empty
         )
 
