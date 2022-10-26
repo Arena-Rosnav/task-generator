@@ -5,7 +5,7 @@ import rospy
 import time
 from nav_msgs.msg import Odometry
 from std_msgs.msg import Int16, Bool
-from std_srvs.srv import Empty, EmptyResponse
+from std_srvs.srv import Empty, EmptyRequest, EmptyResponse
 from geometry_msgs.msg import PoseStamped
 
 
@@ -43,11 +43,23 @@ class TaskGenerator:
 
         self.start_time = rospy.get_time()
         self.task = get_predefined_task("", self.task_mode, self.env_wrapper)
+        self.task.set_robot_names_param()
+
+        self.number_of_resets = 0
+
+        self.srv_start_model_visualization = rospy.ServiceProxy("start_model_visualization", Empty)
+        self.srv_start_model_visualization(EmptyRequest())
+        
+        self.reset_task()
+
+        rospy.sleep(2)
+
+        self.srv_setup_finished = rospy.ServiceProxy("task_generator_setup_finished", Empty)
+        self.srv_setup_finished(EmptyRequest())
 
         self.number_of_resets = 0
 
         self.reset_task()
-
         ## Timers
         rospy.Timer(rospy.Duration(0.5), self.check_task_status)
 

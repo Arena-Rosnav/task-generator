@@ -26,6 +26,20 @@ class BaseTask():
     def _set_up_robot_managers(self):
         for manager in self.robot_managers:
             manager.set_up_robot()
+
+    def _get_robot_names(self):
+        names = []
+
+        for manager in self.robot_managers:
+            names.append(manager.namespace)
+
+        return names
+
+    def set_robot_names_param(self):
+        names = self._get_robot_names()
+
+        rospy.set_param("/robot_names", names)
+
         
     def reset(self, callback):
         """
