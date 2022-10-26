@@ -1,12 +1,10 @@
 from abc import abstractmethod
 import rospy
 from geometry_msgs.msg import PoseStamped, Pose2D
-from std_srvs.srv import Trigger
 import numpy as np
 import os
 import yaml
 import math
-import time
 import rospkg
 import random
 from flatland_msgs.srv import (
@@ -70,7 +68,7 @@ class FlatlandEnvironment(BaseEnvironment):
         self._robot_radius = rospy.get_param("robot_radius")
         self._is_training_mode = rospy.get_param("train_mode")
         self._step_size = rospy.get_param("step_size")
-        self._robot_yaml_path = rospy.get_param("robot_yaml_path")
+        # self._robot_yaml_path = rospy.get_param("robot_yaml_path")
         self._tmp_model_path = rospy.get_param("tmp_model_path", "/tmp")
 
         rospy.wait_for_service(f"{self._ns_prefix}move_model", timeout=T)
@@ -90,12 +88,12 @@ class FlatlandEnvironment(BaseEnvironment):
             f"{self._ns_prefix}delete_model", DeleteModel
         )
 
-        self._spawn_peds_srv = rospy.ServiceProxy(
-            f"{self._ns_prefix}pedsim_simulator/spawn_peds", SpawnPeds
-        )
-        self._reset_peds_srv = rospy.ServiceProxy(
-            f"{self._ns_prefix}pedsim_simulator/reset_all_peds", Trigger
-        )
+        # self._spawn_peds_srv = rospy.ServiceProxy(
+        #     f"{self._ns_prefix}pedsim_simulator/spawn_peds", SpawnPeds
+        # )
+        # self._reset_peds_srv = rospy.ServiceProxy(
+        #     f"{self._ns_prefix}pedsim_simulator/reset_all_peds", Trigger
+        # )
 
         self._obstacles_amount = 0
 
@@ -120,15 +118,20 @@ class FlatlandEnvironment(BaseEnvironment):
         self._delete_model_srv(delete_model_request)
 
     def spawn_pedsim_agents(self, dynamic_obstacles):
-        peds = [
-            PedsimManager.create_pedsim_msg(agent) 
-            for agent in dynamic_obstacles
-        ]
+        # if len(dynamic_obstacles) <= 0:
+        #     return
 
-        self._spawn_peds_srv(peds)
+        # peds = [
+        #     PedsimManager.create_pedsim_msg(agent) 
+        #     for agent in dynamic_obstacles
+        # ]
+
+        # self._spawn_peds_srv(peds)
+        pass
 
     def reset_pedsim_agents(self):
-        self._reset_peds_srv()
+        # self._reset_peds_srv()
+        pass
 
     def spawn_obstacle(self, position, yaml_path=""):
         name = FlatlandEnvironment.create_obs_name(self._obstacles_amount)

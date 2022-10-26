@@ -20,8 +20,8 @@ from task_generator.environments.flatland_environment import FlatlandRandomModel
 
 class TaskGenerator:
     """
-        Task Generator Node
-        Will initialize and reset all tasks. The task to use is read from the `/task_mode` param.
+    Task Generator Node
+    Will initialize and reset all tasks. The task to use is read from the `/task_mode` param.
     """
 
     def __init__(self) -> None:
@@ -41,7 +41,7 @@ class TaskGenerator:
 
         rospy.loginfo(f"Launching task mode: {self.task_mode}")
 
-        self.start_time = rospy.get_time() 
+        self.start_time = rospy.get_time()
         self.task = get_predefined_task("", self.task_mode, self.env_wrapper)
 
         self.number_of_resets = 0
@@ -53,8 +53,6 @@ class TaskGenerator:
 
 
     def check_task_status(self, _):
-        ## TODO CHECK IF END AND DONT RESET THEN
-
         if self.task.is_done():
             self.reset_task()
 
@@ -95,9 +93,7 @@ class TaskGenerator:
 
 if __name__ == "__main__":
     rospy.init_node("task_generator")
-    
-    rospy.wait_for_service("/static_map")
 
     task_generator = TaskGenerator()
-    
+
     rospy.spin()
