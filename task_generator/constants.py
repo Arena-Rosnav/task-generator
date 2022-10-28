@@ -61,10 +61,6 @@ class FlatlandRandomModel:
     }
     LINEAR_VEL = 0.2
     ANGLUAR_VEL_MAX = 0.2
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 
 class Pedsim:
     START_UP_MODE = "default"
