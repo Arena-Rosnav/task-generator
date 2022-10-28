@@ -141,10 +141,6 @@ class StagedRandomTask(RandomTask):
             **kwargs
         )
     
-    def _set_up_robot_managers(self):
-        for manager in self.robot_managers:
-            manager.set_up_robot(launch_robot_controller=False)
-
     def _init_stage(self, stage):
         static_obstacles = self._stages[stage]["static"]
         dynamic_obstacles = self._stages[stage]["dynamic"]

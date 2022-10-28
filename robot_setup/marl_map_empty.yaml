@@ -3,13 +3,13 @@ robots:
   #   planner: rosnav
   #   amount: 6
   #   agent: rto_tlabs_marl
-  - model: agvota
+  - model: jackal
     planner: teb
-    amount: 1
+    amount: 6
     agent: new_jackal
-  - model: burger
+  - model: rto
     planner: teb
-    amount: 1
+    amount: 6
     agent: new_jackal
   # - model: cob4
   #   planner: teb

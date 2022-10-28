@@ -38,7 +38,7 @@ class RobotManager:
 
         self.robot_setup = robot_setup
 
-    def set_up_robot(self, launch_robot_controller=True):
+    def set_up_robot(self):
         if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
             self.robot_radius = rospy.get_param("robot_radius")
 
@@ -54,9 +54,6 @@ class RobotManager:
         )
 
         if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
-            return
-
-        if not launch_robot_controller:
             return
 
         self.launch_robot(self.robot_setup)

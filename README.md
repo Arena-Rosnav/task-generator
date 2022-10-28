@@ -1,11 +1,6 @@
 # Arena Rosnav Task Generator
 
-This is the task generator package designed to work with:
-
-- [arena-rosnav](https://github.com/Arena-Rosnav/arena-rosnav)
-- [arena-rosnav-3d]()
-
-The task generator is especially designed for single robot simulations.
+This is the task generator package designed to work with the [Arena Benchmark](https://github.com/Arena-Rosnav/arena-rosnav) infrastructure.
 
 ## Task Modes
 
