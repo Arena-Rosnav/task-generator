@@ -19,8 +19,6 @@ from task_generator.utils import Utils
 
 from map_distance_server.srv import GetDistanceMap
 
-from nav_msgs.srv import GetMap
-
 
 def get_predefined_task(namespace, mode, environment=None, **kwargs):
     """

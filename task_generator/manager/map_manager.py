@@ -27,13 +27,11 @@ class MapManager:
         This function is used by the robot manager and
         obstacles manager to get new positions for both
         robot and obstalces.
-
         The function will choose a position at random
         and then validate the position. If the position
         is not valid a new position is chosen. When
         no valid position is found after 100 retries
         an error is thrown.
-
         Args:
             safe_dist: minimal distance to the next
                 obstacles for calculated positons

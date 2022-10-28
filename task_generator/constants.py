@@ -10,6 +10,8 @@ class Constants:
 
         OBSTACLE_MAX_RADIUS = 0.6
 
+        OBSTACLE_MAX_RADIUS = 0.6
+    
     class RobotManager:
         SPAWN_ROBOT_SAFE_DIST = 0.4
 
@@ -59,7 +61,10 @@ class FlatlandRandomModel:
     }
     LINEAR_VEL = 0.2
     ANGLUAR_VEL_MAX = 0.2
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 
 class Pedsim:
     START_UP_MODE = "default"
