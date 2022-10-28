@@ -19,7 +19,8 @@ Creates random static and dynamic obstacles when a new task is started. When sta
 
 Manual task mode is the same as the random task except that a goal must be set manually via the rviz *2D Nav Goal* button.
 
-> TODO IMAGE
+![image](https://arena-rosnav-wiki.readthedocs.io/en/latest/images/manual_task.png)
+
 
 ### Staged Task
 

@@ -1,6 +1,10 @@
+import os
+
+
 class BaseEnvironment:
     def __init__(self, namespace):
-        pass
+        self._namespace = namespace
+        self._ns_prefix = lambda *topic: os.path.join(self._namespace, *topic)
 
     def before_reset_task(self):
         """
@@ -53,7 +57,7 @@ class BaseEnvironment:
         """
         raise NotImplementedError()
 
-    def move_robot(self, pos):
+    def move_robot(self, pos, name=None):
         """
         Move the robot to the given position. 
         """

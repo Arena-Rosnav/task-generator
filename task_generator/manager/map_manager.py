@@ -46,11 +46,11 @@ class MapManager:
         # safe_dist is in meters so at first calc safe dist to distance on
         # map -> resolution of map is m / cell -> safe_dist in cells is
         # safe_dist / resolution
-        safe_dist_in_cells = math.ceil(safe_dist / self.map.info.resolution) + 5
+        safe_dist_in_cells = math.ceil(safe_dist / self.map.info.resolution) + 1
 
         forbidden_zones_in_cells = list(
             map(
-                lambda point: [int(p / self.map.info.resolution) for p in point],
+                lambda point: [math.ceil(p / self.map.info.resolution) for p in point],
                 forbidden_zones
             )
         )
@@ -92,7 +92,7 @@ class MapManager:
         for p in forbidden_zones:
                 f_x, f_y, radius = p
 
-                dist = math.ceil(math.sqrt(
+                dist = math.floor(math.sqrt(
                     (x - f_x) ** 2 + (y - f_y) ** 2
                 ))
 
