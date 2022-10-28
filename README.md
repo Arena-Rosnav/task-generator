@@ -15,13 +15,6 @@ Our task generator package offers four task modes. We define a task as the proce
 
 Creates random static and dynamic obstacles when a new task is started. When starting the task a random goal and start position is selected. After the robot reaching the goal a new task is started.
 
-### Manual Task
-
-Manual task mode is the same as the random task except that a goal must be set manually via the rviz *2D Nav Goal* button.
-
-![image](https://arena-rosnav-wiki.readthedocs.io/en/latest/images/manual_task.png)
-
-
 ### Staged Task
 
 The staged task mode is designed for the trainings process of arena-rosnav. In general, it behaves like the random task mode but there are multiple stages between one can switch. Between the stages, the amount of static and dynamic obstacles changes. The amount of obstacles is defined in a curriculum file, the path to said file is a key in the `paths` parameter.
