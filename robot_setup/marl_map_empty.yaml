@@ -4,13 +4,13 @@ robots:
   #   amount: 6
   #   agent: rto_tlabs_marl
   - model: jackal
-    planner: teb
+    planner: rosnav
     amount: 6
-    agent: new_jackal
+    agent: jackal_marl
   - model: rto
-    planner: teb
+    planner: rosnav
     amount: 6
-    agent: new_jackal
+    agent: rto_tlabs_marl
   # - model: cob4
   #   planner: teb
   #   amount: 1

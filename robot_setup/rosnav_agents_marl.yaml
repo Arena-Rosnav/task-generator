@@ -4,8 +4,8 @@ robots:
   #   amount: 1
   #   agent: ridgeback_marl
   - model: rto
-    planner: rosnav
-    amount: 3
+    planner: teb
+    amount: 30
     agent: rto_tlabs_marl
   # - model: jackal
   #   planner: rosnav
