@@ -22,8 +22,6 @@ class ScenarioTask(BaseTask):
 
         self.scenario_file = self.read_scenario_file(scenario_file_path)
 
-        print(scenario_file_path, self.scenario_file)
-
         super().__init__(obstacles_manager, robot_managers, map_manager, **kwargs)
 
         self._check_map_paths()
