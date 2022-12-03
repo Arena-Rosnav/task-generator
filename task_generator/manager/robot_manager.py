@@ -168,6 +168,7 @@ class RobotManager:
             f"model:={robot_setup['model']}",
             f"local_planner:={robot_setup['planner']}",
             f"namespace:={self.namespace}",
+            f"record_data:={rospy.get_param('record_data', False) and rospy.get_param('task_mode', 'scenario') == 'scenario'}",
             *([f"agent_name:={robot_setup.get('agent')}"] if robot_setup.get('agent') else [])
         ]
 
