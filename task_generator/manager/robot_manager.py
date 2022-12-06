@@ -37,6 +37,7 @@ class RobotManager:
         self.is_goal_reached = False
 
         self.robot_setup = robot_setup
+        self.record_data = rospy.get_param('record_data', False)#  and rospy.get_param('task_mode', 'scenario') == 'scenario'
 
     def set_up_robot(self):
         if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
@@ -86,6 +87,10 @@ class RobotManager:
         self.start_pos, self.goal_pos = self.generate_new_start_and_goal(
             forbidden_zones, start_pos, goal_pos
         )
+
+        if self.record_data:
+            rospy.set_param(os.path.join(self.namespace, "goal"), list(self.goal_pos))
+            rospy.set_param(os.path.join(self.namespace, "start"), list(self.start_pos))
 
         self.publish_goal(self.goal_pos)
         self.move_robot_to_start()
@@ -168,7 +173,7 @@ class RobotManager:
             f"model:={robot_setup['model']}",
             f"local_planner:={robot_setup['planner']}",
             f"namespace:={self.namespace}",
-            f"record_data:={rospy.get_param('record_data', False) and rospy.get_param('task_mode', 'scenario') == 'scenario'}",
+            f"record_data:={self.record_data}",
             *([f"agent_name:={robot_setup.get('agent')}"] if robot_setup.get('agent') else [])
         ]
 
