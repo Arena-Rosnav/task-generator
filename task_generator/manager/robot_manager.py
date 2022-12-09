@@ -166,7 +166,6 @@ class RobotManager:
         roslaunch_file = roslaunch.rlutil.resolve_launch_arguments(
             ["arena_bringup", "robot.launch"]
         )
-
         args = [
             f"model:={robot_setup['model']}",
             f"local_planner:={robot_setup['planner']}",
@@ -178,25 +177,26 @@ class RobotManager:
             roslaunch.rlutil.get_or_generate_uuid(None, False),
             [(*roslaunch_file, args)]
         )
-
         self.process.start()
 
         # Overwrite default move base params
+        base_frame = rospy.get_param(os.path.join(self.namespace, "robot_base_frame"))
+        sensor_frame = rospy.get_param(os.path.join(self.namespace, "robot_sensor_frame"))
         rospy.set_param(
             os.path.join(self.namespace, "move_base", "global_costmap", "robot_base_frame"),
-            (self.namespace).replace("/", "") + "_base_footprint"
+            self.namespace.replace("/", "") + "/" + base_frame
         )
         rospy.set_param(
             os.path.join(self.namespace, "move_base", "local_costmap", "robot_base_frame"),
-            (self.namespace).replace("/", "") + "_base_footprint"
+            self.namespace.replace("/", "") + "/" + base_frame
         )
         rospy.set_param(
             os.path.join(self.namespace, "move_base", "local_costmap", "scan", "sensor_frame"),
-            (self.namespace).replace("/", "") + "_laser_link"
+            self.namespace.replace("/", "") + "/" + sensor_frame
         )
         rospy.set_param(
             os.path.join(self.namespace, "move_base", "global_costmap", "scan", "sensor_frame"),
-            (self.namespace).replace("/", "") + "_laser_link"
+            self.namespace.replace("/", "") + "/" + base_frame
         )
 
     def robot_pos_callback(self, data):
