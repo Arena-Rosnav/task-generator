@@ -7,7 +7,8 @@ from task_generator.constants import Constants
 
 from task_generator.environments.environment_factory import EnvironmentFactory
 from task_generator.environments.gazebo_environment import GazeboEnvironment
-from task_generator.environments.flatland_environment import FlatlandRandomModel
+from task_generator.environments.flatland_environment import FlatlandEnvironment
+from task_generator.environments.unity_environment import UnityEnvironment
 from task_generator.manager.map_manager import MapManager
 from task_generator.manager.obstacle_manager import ObstacleManager
 from task_generator.manager.robot_manager import RobotManager

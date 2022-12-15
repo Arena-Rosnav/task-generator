@@ -89,8 +89,8 @@ class RobotManager:
         )
 
         if self.record_data:
-            rospy.set_param(os.path.join(self.namespace, "goal"), list(self.goal_pos))
-            rospy.set_param(os.path.join(self.namespace, "start"), list(self.start_pos))
+            rospy.set_param(os.path.join(self.namespace, "goal"), str(list(self.goal_pos)))
+            rospy.set_param(os.path.join(self.namespace, "start"), str(list(self.start_pos)))
 
         self.publish_goal(self.goal_pos)
         self.move_robot_to_start()

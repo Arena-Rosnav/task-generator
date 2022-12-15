@@ -1,5 +1,7 @@
 import os
-
+import rospkg
+import subprocess
+import yaml
 
 class BaseEnvironment:
     def __init__(self, namespace):
@@ -40,7 +42,7 @@ class BaseEnvironment:
         """
         raise NotImplementedError()
 
-    def spawn_random_static_obstacles(self, **args):
+    def spawn_random_static_obstacle(self, **args):
         """
         Spawn a single random static obstacle.
         
@@ -82,3 +84,27 @@ class BaseEnvironment:
 
     def spawn_obstacle(self, position, yaml_path=""):
         raise NotImplementedError()
+
+    @staticmethod
+    def get_robot_description(robot_name, namespace):
+        arena_sim_path = rospkg.RosPack().get_path("arena-simulation-setup")
+        
+        return subprocess.check_output([
+            "rosrun", 
+            "xacro",
+            "xacro",
+            os.path.join(arena_sim_path, "robot", robot_name, "urdf", f"{robot_name}.urdf.xacro"),
+            f"robot_namespace:={namespace}"
+        ]).decode("utf-8")
+
+    @staticmethod
+    def read_robot_parameters(robot_name):
+        robot_param_path = os.path.join(
+            rospkg.RosPack().get_path("arena-simulation-setup"),
+            "robot",
+            robot_name,
+            "model_params.yaml"
+        )
+
+        with open(robot_param_path, "r") as file:
+            return yaml.safe_load(file)

@@ -8,7 +8,6 @@ from geometry_msgs.msg import Pose, PoseStamped, Quaternion
 from pedsim_srvs.srv import SpawnPeds
 from std_msgs.msg import Empty
 from std_srvs.srv import Empty, SetBool, Trigger
-from task_generator.environments.environment_factory import EnvironmentFactory
 from tf.transformations import quaternion_from_euler
 
 from ..constants import Constants
