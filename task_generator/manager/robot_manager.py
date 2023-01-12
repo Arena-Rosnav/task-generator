@@ -38,6 +38,8 @@ class RobotManager:
 
         self.robot_setup = robot_setup
 
+        self.position = self.start_pos
+
     def set_up_robot(self, launch_robot_controller=True):
         if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
             self.robot_radius = rospy.get_param("robot_radius")
@@ -79,7 +81,7 @@ class RobotManager:
 
         return self.namespace
 
-    def reset(self, forbidden_zones=[], start_pos=None, goal_pos=None):
+    def reset(self, forbidden_zones=[], start_pos=None, goal_pos=None, move_robot=True):
         """
             The manager creates new start and goal position
             when a task is reset, publishes the goal to
@@ -91,7 +93,9 @@ class RobotManager:
         )
 
         self.publish_goal(self.goal_pos)
-        self.move_robot_to_start()
+
+        if move_robot:
+            self.move_robot_to_start()
 
         self.set_is_goal_goached(self.start_pos, self.goal_pos)
 
@@ -102,7 +106,7 @@ class RobotManager:
         except:
             pass
 
-        return self.start_pos, self.goal_pos
+        return self.position, self.goal_pos # self.start_pos, self.goal_pos
 
     def publish_goal_periodically(self, _):
         if self.goal_pos != None:
@@ -170,6 +174,7 @@ class RobotManager:
             f"model:={robot_setup['model']}",
             f"local_planner:={robot_setup['planner']}",
             f"namespace:={self.namespace}",
+            f"complexity:={rospy.get_param('complexity', 1)}",
             *([f"agent_name:={robot_setup.get('agent')}"] if robot_setup.get('agent') else [])
         ]
 
@@ -202,8 +207,10 @@ class RobotManager:
     def robot_pos_callback(self, data):
         current_position = data.pose.pose.position
 
+        self.position = [current_position.x, current_position.y]
+
         self.set_is_goal_goached(
-            [current_position.x, current_position.y],
+            self.position,
             self.goal_pos
         )
 

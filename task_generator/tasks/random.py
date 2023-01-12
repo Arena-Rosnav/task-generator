@@ -37,7 +37,7 @@ class RandomTask(BaseTask):
         for manager in self.robot_managers:
             for pos in manager.reset(
                 forbidden_zones=robot_positions
-            ):
+            ):            
                 robot_positions.append(
                     [
                         pos[0], 

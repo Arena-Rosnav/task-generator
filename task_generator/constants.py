@@ -5,8 +5,8 @@ class Constants:
     MAX_RESET_FAIL_TIMES = 3
 
     class ObstacleManager:
-        DYNAMIC_OBSTACLES = 15
-        STATIC_OBSTACLES = 20
+        DYNAMIC_OBSTACLES = 0
+        STATIC_OBSTACLES = 0
 
         OBSTACLE_MAX_RADIUS = 0.6
 
@@ -30,10 +30,10 @@ class TaskMode:
     SCENARIO = "scenario"
 
     class Random:
-        MIN_DYNAMIC_OBS = 1
-        MAX_DYNAMIC_OBS = 3
-        MIN_STATIC_OBS = 1
-        MAX_STATIC_OBS = 3
+        MIN_DYNAMIC_OBS = 0
+        MAX_DYNAMIC_OBS = 0
+        MIN_STATIC_OBS = 0
+        MAX_STATIC_OBS = 0
 
     class Scenario:
         RESETS_DEFAULT = 5
@@ -61,10 +61,6 @@ class FlatlandRandomModel:
     }
     LINEAR_VEL = 0.2
     ANGLUAR_VEL_MAX = 0.2
-<<<<<<< HEAD
-
-=======
->>>>>>> master
 
 class Pedsim:
     START_UP_MODE = "default"
