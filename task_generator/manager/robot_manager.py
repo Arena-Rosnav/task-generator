@@ -26,7 +26,6 @@ class RobotManager:
         self.namespace_prefix = "" if namespace == "" else "/" + namespace + "/"
         self.ns_prefix = lambda *topic: os.path.join(self.namespace, *topic)
 
-
         self.map_manager = map_manager
         self.environment = environment
 
@@ -95,7 +94,7 @@ class RobotManager:
         self.publish_goal(self.goal_pos)
         self.move_robot_to_start()
 
-        self.set_is_goal_goached(self.start_pos, self.goal_pos)
+        self.set_is_goal_reached(self.start_pos, self.goal_pos)
 
         time.sleep(0.1)
 
@@ -168,6 +167,9 @@ class RobotManager:
         roslaunch_file = roslaunch.rlutil.resolve_launch_arguments(
             ["arena_bringup", "robot.launch"]
         )
+
+        print("START WITH MODEL", robot_setup["model"])
+
         args = [
             f"model:={robot_setup['model']}",
             f"local_planner:={robot_setup['planner']}",
@@ -205,12 +207,12 @@ class RobotManager:
     def robot_pos_callback(self, data):
         current_position = data.pose.pose.position
 
-        self.set_is_goal_goached(
+        self.set_is_goal_reached(
             [current_position.x, current_position.y],
             self.goal_pos
         )
 
-    def set_is_goal_goached(self, start, goal):
+    def set_is_goal_reached(self, start, goal):
         distance_to_goal = math.sqrt(
             (start[0] - goal[0]) ** 2
             + (start[1] - goal[1]) ** 2 
