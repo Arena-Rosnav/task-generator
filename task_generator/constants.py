@@ -34,7 +34,7 @@ class TaskMode:
         MIN_DYNAMIC_OBS = 10
         MAX_DYNAMIC_OBS = 15
         MIN_STATIC_OBS = 10
-        MAX_STATIC_OBS = 15
+        MAX_STATIC_OBS = 20
 
     class Scenario:
         RESETS_DEFAULT = 5

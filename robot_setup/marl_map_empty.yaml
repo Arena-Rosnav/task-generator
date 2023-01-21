@@ -5,15 +5,15 @@ robots:
   #   agent: rto_tlabs_marl
   - model: jackal
     planner: rosnav
-    amount: 10
+    amount: 2
     agent: jackal_marl
   - model: rto
     planner: rosnav
-    amount: 10
-    agent: rto_tlabs_marl
+    amount: 2
+    agent: rto_marl
   - model: ridgeback
     planner: rosnav
-    amount: 10
+    amount: 2
     agent: ridgeback_marl
   # - model: cob4
   #   planner: teb
