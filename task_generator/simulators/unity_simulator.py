@@ -4,14 +4,14 @@ import os
 from tf.transformations import quaternion_from_euler
 from geometry_msgs.msg import Pose, Quaternion
 
-from .base_environment import BaseEnvironment
-from .environment_factory import EnvironmentFactory
-from ..constants import UnityEnvironmentConstants
+from .base_simulator import BaseSimulator
+from .simulator_factory import SimulatorFactory
+from ..constants import UnitySimulatorConstants
 
 from unity_msgs.srv import SpawnRobot, SpawnRobotRequest, MoveModel, MoveModelRequest
 
-@EnvironmentFactory.register("unity")
-class UnityEnvironment(BaseEnvironment):
+@SimulatorFactory.register("unity")
+class UnitySimulator(BaseSimulator):
     def __init__(self, namespace):
 
         print("STARTING UP")
@@ -41,7 +41,7 @@ class UnityEnvironment(BaseEnvironment):
 
     def remove_all_obstacles(self):
         """
-        Removes all obstacles from the current environment. Does not remove
+        Removes all obstacles from the current simulator. Does not remove
         the robot!
         """
         pass
@@ -101,22 +101,22 @@ class UnityEnvironment(BaseEnvironment):
 
     def spawn_robot(self, name, robot_name, namespace_appendix=""):
         """
-        Spawn a robot in the environment.
+        Spawn a robot in the simulator.
         A position is not specified because the robot is moved at the 
         desired position anyway.
         """
         print("SPAWN ROBOT CALLED")
 
-        robot_description = UnityEnvironment.get_robot_description(robot_name, namespace_appendix)
+        robot_description = UnitySimulator.get_robot_description(robot_name, namespace_appendix)
 
         robot_urdf_file_path = os.path.join(
-            os.environ[UnityEnvironmentConstants.UNITY_ROS_NAVIGATION],
+            os.environ[UnitySimulatorConstants.UNITY_ROS_NAVIGATION],
             f"{robot_name}.urdf"
         )
 
-        robot_parameters = UnityEnvironment.read_robot_parameters(robot_name)
+        robot_parameters = UnitySimulator.read_robot_parameters(robot_name)
 
-        UnityEnvironment.write_urdf_file_to_unity_dir(
+        UnitySimulator.write_urdf_file_to_unity_dir(
             robot_urdf_file_path,
             robot_description
         )
@@ -128,7 +128,7 @@ class UnityEnvironment(BaseEnvironment):
         request.model_namespace = namespace_appendix
         request.reference_frame = "world"
 
-        linear_range = UnityEnvironment.get_robot_linear_range(
+        linear_range = UnitySimulator.get_robot_linear_range(
             robot_parameters["actions"]["continuous"]["linear_range"]
         )
 
@@ -145,7 +145,7 @@ class UnityEnvironment(BaseEnvironment):
 
         self._spawn_robot_srv(request)
 
-        UnityEnvironment.delete_robot_file_in_unity_dir(robot_urdf_file_path)
+        UnitySimulator.delete_robot_file_in_unity_dir(robot_urdf_file_path)
 
     def spawn_pedsim_agents(self, agents):
         """

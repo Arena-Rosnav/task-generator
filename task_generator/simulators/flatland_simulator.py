@@ -21,20 +21,20 @@ from task_generator.manager.pedsim_manager import PedsimManager
 from task_generator.utils import Utils
 
 from ..constants import Constants, FlatlandRandomModel
-from .base_environment import BaseEnvironment
-from .environment_factory import EnvironmentFactory
+from .base_simulator import BaseSimulator
+from .simulator_factory import SimulatorFactory
 
 
 T = Constants.WAIT_FOR_SERVICE_TIMEOUT
 
 
-@EnvironmentFactory.register("flatland")
-class FlatlandEnvironment(BaseEnvironment):
+@SimulatorFactory.register("flatland")
+class FlatlandSimulator(BaseSimulator):
     """
         This is the flatland encoder for connecting
         flatland with the arena-benchmark task
         generator. The class implements all methods
-        defined in `BaseEnvironment`.
+        defined in `BaseSimulator`.
 
         For flatland to work properly, a dedicated .yaml
         file has to be created for each used model. This
@@ -105,7 +105,7 @@ class FlatlandEnvironment(BaseEnvironment):
 
     def remove_all_obstacles(self):
         for obs in range(self._obstacles_amount):
-            obs_name = FlatlandEnvironment.create_obs_name(obs)
+            obs_name = FlatlandSimulator.create_obs_name(obs)
 
             self._delete_model(obs_name)
 
@@ -134,7 +134,7 @@ class FlatlandEnvironment(BaseEnvironment):
         pass
 
     def spawn_obstacle(self, position, yaml_path=""):
-        name = FlatlandEnvironment.create_obs_name(self._obstacles_amount)
+        name = FlatlandSimulator.create_obs_name(self._obstacles_amount)
 
         self._spawn_model(yaml_path, name, self._namespace, position)
 
@@ -151,7 +151,7 @@ class FlatlandEnvironment(BaseEnvironment):
         ):
         model = self._generate_random_obstacle(is_dynamic=is_dynamic, **args)
 
-        obstacle_name = FlatlandEnvironment.create_obs_name(
+        obstacle_name = FlatlandSimulator.create_obs_name(
             self._obstacles_amount
         )
 
@@ -338,8 +338,8 @@ class FlatlandEnvironment(BaseEnvironment):
         plugins = file_content["plugins"]
 
         for plugin in plugins:
-            if FlatlandEnvironment.PLUGIN_PROPS_TO_EXTEND.get(plugin["type"]):
-                prop_names = FlatlandEnvironment.PLUGIN_PROPS_TO_EXTEND.get(plugin["type"])
+            if FlatlandSimulator.PLUGIN_PROPS_TO_EXTEND.get(plugin["type"]):
+                prop_names = FlatlandSimulator.PLUGIN_PROPS_TO_EXTEND.get(plugin["type"])
 
                 for name in prop_names:
                     plugin[name] = os.path.join(namespace, plugin[name])

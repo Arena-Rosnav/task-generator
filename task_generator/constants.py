@@ -1,6 +1,6 @@
 class Constants:
     GOAL_REACHED_TOLERANCE = 1.0
-    TIMEOUT = 100000000 ## 3 min
+    TIMEOUT = 10 ## 3 min
     WAIT_FOR_SERVICE_TIMEOUT = 5 # 5 secs
     MAX_RESET_FAIL_TIMES = 3
 
@@ -15,7 +15,7 @@ class Constants:
     class RobotManager:
         SPAWN_ROBOT_SAFE_DIST = 0.4
 
-    class Environment:
+    class Simulator:
         FLATLAND = "flatland"
         GAZEBO = "gazebo"
         UNITY = "unity"
@@ -88,5 +88,5 @@ class Pedsim:
     FORCE_FACTOR_ROBOT = 0.0
     WAYPOINT_MODE = 0
 
-class UnityEnvironmentConstants:
+class UnitySimulatorConstants:
     UNITY_ROS_NAVIGATION = "UNITY_ROS_NAVIGATION"

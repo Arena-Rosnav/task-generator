@@ -11,14 +11,14 @@ from std_srvs.srv import Empty, SetBool, Trigger
 from tf.transformations import quaternion_from_euler
 
 from ..constants import Constants
-from .base_environment import BaseEnvironment
-from .environment_factory import EnvironmentFactory
+from .base_simulator import BaseSimulator
+from .simulator_factory import SimulatorFactory
 
 T = Constants.WAIT_FOR_SERVICE_TIMEOUT
 
 
-@EnvironmentFactory.register("gazebo")
-class GazeboEnvironment(BaseEnvironment):
+@SimulatorFactory.register("gazebo")
+class GazeboSimulator(BaseSimulator):
     def __init__(self, namespace):
         super().__init__(namespace)
 
@@ -124,7 +124,7 @@ class GazeboEnvironment(BaseEnvironment):
 
         robot_namespace = self._ns_prefix(namespace_appendix)
         
-        robot_description = GazeboEnvironment.get_robot_description(
+        robot_description = GazeboSimulator.get_robot_description(
             robot_name, robot_namespace
         )
         rospy.set_param(os.path.join(robot_namespace, "robot_description"), robot_description)

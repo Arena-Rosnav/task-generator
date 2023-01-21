@@ -3,7 +3,7 @@ import rospkg
 import subprocess
 import yaml
 
-class BaseEnvironment:
+class BaseSimulator:
     def __init__(self, namespace):
         self._namespace = namespace
         self._ns_prefix = lambda *topic: os.path.join(self._namespace, *topic)
@@ -24,7 +24,7 @@ class BaseEnvironment:
 
     def remove_all_obstacles(self):
         """
-        Removes all obstacles from the current environment. Does not remove
+        Removes all obstacles from the current simulator. Does not remove
         the robot!
         """
         raise NotImplementedError()
@@ -67,7 +67,7 @@ class BaseEnvironment:
 
     def spawn_robot(self):
         """
-        Spawn a robot in the environment.
+        Spawn a robot in the simulator.
         A position is not specified because the robot is moved at the 
         desired position anyway.
         """
