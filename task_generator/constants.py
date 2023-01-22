@@ -1,6 +1,6 @@
 class Constants:
     GOAL_REACHED_TOLERANCE = 1.0
-    TIMEOUT = 10 ## 3 min
+    TIMEOUT = 60 * 3 ## 3 min
     WAIT_FOR_SERVICE_TIMEOUT = 5 # 5 secs
     MAX_RESET_FAIL_TIMES = 3
 
@@ -61,7 +61,7 @@ class FlatlandRandomModel:
         "body": "base_link"
     }
     LINEAR_VEL = 0.2
-    ANGLUAR_VEL_MAX = 0.2
+    ANGLUAR_VEL_MAX = 0.1
 
 class Pedsim:
     START_UP_MODE = "default"
