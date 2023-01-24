@@ -61,7 +61,9 @@ class StagedRandomTask(RandomTask):
 
     def next_stage(self, _):
         if self._curr_stage >= len(self._stages):
-            rospy.loginfo(f"({self.namespace}) INFO: Tried to trigger next stage but already reached last one")
+            rospy.loginfo(
+                f"({self.namespace}) INFO: Tried to trigger next stage but already reached last one"
+            )
             return
 
         self._curr_stage = self._curr_stage + 1
@@ -70,7 +72,9 @@ class StagedRandomTask(RandomTask):
 
     def previous_stage(self, _):
         if self._curr_stage <= 1:
-            rospy.loginfo(f"({self.namespace}) INFO: Tried to trigger previous stage but already reached first one")
+            rospy.loginfo(
+                f"({self.namespace}) INFO: Tried to trigger previous stage but already reached first one"
+            )
             return
 
         self._curr_stage = self._curr_stage - 1
@@ -94,14 +98,12 @@ class StagedRandomTask(RandomTask):
         if self._debug_mode:
             return
 
-        self._hyperparams_file_path = os.path.join(
-            paths.get("model"), "hyperparameters.json"
-        )
+        self._hyperparams_file_path = paths["config"]
         self._hyperparams_lock = FileLock(f"{self._hyperparams_file_path}.lock")
 
         assert os.path.isfile(
             self._hyperparams_file_path
-        ), f"Found no 'hyperparameters.json' at {self._hyperparams_file_path}"
+        ), f"Found no 'training_config.yaml' at {self._hyperparams_file_path}"
 
     def _update_stage_in_hyperparams(self, stage):
         """
@@ -114,15 +116,12 @@ class StagedRandomTask(RandomTask):
 
         self._hyperparams_lock.acquire()
 
-        file = open(self._hyperparams_file_path, "r")
-
-        hyperparams = json.load(file)
-        hyperparams["curr_stage"] = stage
+        with open(self._hyperparams_file_path, "r", encoding="utf-8") as target:
+            hyperparams = yaml.load(target, Loader=yaml.FullLoader)
+            hyperparams["callbacks"]["training_curriculum"]["curr_stage"] = stage
 
         with open(self._hyperparams_file_path, "w", encoding="utf-8") as target:
-            json.dump(hyperparams, target, ensure_ascii=False, indent=4)
-
-        file.close()
+            yaml.dump(hyperparams, target, ensure_ascii=False, indent=4)
 
         self._hyperparams_lock.release()
 
@@ -133,14 +132,14 @@ class StagedRandomTask(RandomTask):
         )
 
     def _reset_robot_and_obstacles(
-            self, static_obstacles=None, dynamic_obstacles=None, **kwargs
-        ):
+        self, static_obstacles=None, dynamic_obstacles=None, **kwargs
+    ):
         super()._reset_robot_and_obstacles(
-            static_obstacles=static_obstacles, 
+            static_obstacles=static_obstacles,
             dynamic_obstacles=dynamic_obstacles,
-            **kwargs
+            **kwargs,
         )
-    
+
     def _init_stage(self, stage):
         static_obstacles = self._stages[stage]["static"]
         dynamic_obstacles = self._stages[stage]["dynamic"]
