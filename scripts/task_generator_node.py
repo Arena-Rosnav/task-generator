@@ -60,9 +60,9 @@ class TaskGenerator:
         self.number_of_resets = 0
 
         self.reset_task(move_robot=False)
+
         ## Timers
         rospy.Timer(rospy.Duration(0.5), self.check_task_status)
-
 
     def check_task_status(self, _):
         if self.task.is_done():

@@ -26,7 +26,6 @@ class RobotManager:
         self.namespace_prefix = "" if namespace == "" else "/" + namespace + "/"
         self.ns_prefix = lambda *topic: os.path.join(self.namespace, *topic)
 
-
         self.map_manager = map_manager
         self.environment = environment
 
@@ -37,10 +36,11 @@ class RobotManager:
         self.is_goal_reached = False
 
         self.robot_setup = robot_setup
+        self.record_data = rospy.get_param('record_data', False)#  and rospy.get_param('task_mode', 'scenario') == 'scenario'
 
         self.position = self.start_pos
 
-    def set_up_robot(self, launch_robot_controller=True):
+    def set_up_robot(self):
         if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
             self.robot_radius = rospy.get_param("robot_radius")
 
@@ -56,9 +56,6 @@ class RobotManager:
         )
 
         if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
-            return
-
-        if not launch_robot_controller:
             return
 
         self.launch_robot(self.robot_setup)
@@ -92,12 +89,16 @@ class RobotManager:
             forbidden_zones, start_pos, goal_pos
         )
 
+        if self.record_data:
+            rospy.set_param(os.path.join(self.namespace, "goal"), str(list(self.goal_pos)))
+            rospy.set_param(os.path.join(self.namespace, "start"), str(list(self.start_pos)))
+
         self.publish_goal(self.goal_pos)
 
         if move_robot:
             self.move_robot_to_start()
 
-        self.set_is_goal_goached(self.start_pos, self.goal_pos)
+        self.set_is_goal_reached(self.start_pos, self.goal_pos)
 
         time.sleep(0.1)
 
@@ -170,11 +171,15 @@ class RobotManager:
         roslaunch_file = roslaunch.rlutil.resolve_launch_arguments(
             ["arena_bringup", "robot.launch"]
         )
+
+        print("START WITH MODEL", robot_setup["model"])
+
         args = [
             f"model:={robot_setup['model']}",
             f"local_planner:={robot_setup['planner']}",
             f"namespace:={self.namespace}",
             f"complexity:={rospy.get_param('complexity', 1)}",
+            f"record_data:={self.record_data}",
             *([f"agent_name:={robot_setup.get('agent')}"] if robot_setup.get('agent') else [])
         ]
 
@@ -209,12 +214,12 @@ class RobotManager:
 
         self.position = [current_position.x, current_position.y]
 
-        self.set_is_goal_goached(
+        self.set_is_goal_reached(
             self.position,
             self.goal_pos
         )
 
-    def set_is_goal_goached(self, start, goal):
+    def set_is_goal_reached(self, start, goal):
         distance_to_goal = math.sqrt(
             (start[0] - goal[0]) ** 2
             + (start[1] - goal[1]) ** 2 

@@ -104,4 +104,4 @@ class ScenarioTask(BaseTask):
 
         if scenario_robots_length > setup_robot_length:
             self.scenario_file["robots"] = self.scenario_file["robots"][:setup_robot_length]
-            rospy.logwarn("Scenario file contains more robots that setup.")
+            rospy.logwarn("Scenario file contains more robots than setup.")

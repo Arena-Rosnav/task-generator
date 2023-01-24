@@ -1,11 +1,6 @@
 # Arena Rosnav Task Generator
 
-This is the task generator package designed to work with:
-
-- [arena-rosnav](https://github.com/Arena-Rosnav/arena-rosnav)
-- [arena-rosnav-3d]()
-
-The task generator is especially designed for single robot simulations.
+This is the task generator package designed to work with the [Arena Benchmark](https://github.com/Arena-Rosnav/arena-rosnav) infrastructure.
 
 ## Task Modes
 
@@ -14,13 +9,6 @@ Our task generator package offers four task modes. We define a task as the proce
 ### Random Task
 
 Creates random static and dynamic obstacles when a new task is started. When starting the task a random goal and start position is selected. After the robot reaching the goal a new task is started.
-
-### Manual Task
-
-Manual task mode is the same as the random task except that a goal must be set manually via the rviz *2D Nav Goal* button.
-
-![image](https://arena-rosnav-wiki.readthedocs.io/en/latest/images/manual_task.png)
-
 
 ### Staged Task
 
