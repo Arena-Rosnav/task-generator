@@ -26,7 +26,6 @@ class RobotManager:
         self.namespace_prefix = "" if namespace == "" else "/" + namespace + "/"
         self.ns_prefix = lambda *topic: os.path.join(self.namespace, *topic)
 
-
         self.map_manager = map_manager
         self.environment = environment
 
@@ -37,6 +36,9 @@ class RobotManager:
         self.is_goal_reached = False
 
         self.robot_setup = robot_setup
+        self.record_data = rospy.get_param('record_data', False)#  and rospy.get_param('task_mode', 'scenario') == 'scenario'
+
+        self.position = self.start_pos
 
     def set_up_robot(self):
         if Utils.get_arena_type() == Constants.ArenaType.TRAINING:
@@ -76,7 +78,7 @@ class RobotManager:
 
         return self.namespace
 
-    def reset(self, forbidden_zones=[], start_pos=None, goal_pos=None):
+    def reset(self, forbidden_zones=[], start_pos=None, goal_pos=None, move_robot=True):
         """
             The manager creates new start and goal position
             when a task is reset, publishes the goal to
@@ -87,10 +89,16 @@ class RobotManager:
             forbidden_zones, start_pos, goal_pos
         )
 
-        self.publish_goal(self.goal_pos)
-        self.move_robot_to_start()
+        if self.record_data:
+            rospy.set_param(os.path.join(self.namespace, "goal"), str(list(self.goal_pos)))
+            rospy.set_param(os.path.join(self.namespace, "start"), str(list(self.start_pos)))
 
-        self.set_is_goal_goached(self.start_pos, self.goal_pos)
+        self.publish_goal(self.goal_pos)
+
+        if move_robot:
+            self.move_robot_to_start()
+
+        self.set_is_goal_reached(self.start_pos, self.goal_pos)
 
         time.sleep(0.1)
 
@@ -99,7 +107,7 @@ class RobotManager:
         except:
             pass
 
-        return self.start_pos, self.goal_pos
+        return self.position, self.goal_pos # self.start_pos, self.goal_pos
 
     def publish_goal_periodically(self, _):
         if self.goal_pos != None:
@@ -164,10 +172,14 @@ class RobotManager:
             ["arena_bringup", "robot.launch"]
         )
 
+        print("START WITH MODEL", robot_setup["model"])
+
         args = [
             f"model:={robot_setup['model']}",
             f"local_planner:={robot_setup['planner']}",
             f"namespace:={self.namespace}",
+            f"complexity:={rospy.get_param('complexity', 1)}",
+            f"record_data:={self.record_data}",
             *([f"agent_name:={robot_setup.get('agent')}"] if robot_setup.get('agent') else [])
         ]
 
@@ -175,36 +187,39 @@ class RobotManager:
             roslaunch.rlutil.get_or_generate_uuid(None, False),
             [(*roslaunch_file, args)]
         )
-
         self.process.start()
 
         # Overwrite default move base params
+        base_frame = rospy.get_param(os.path.join(self.namespace, "robot_base_frame"))
+        sensor_frame = rospy.get_param(os.path.join(self.namespace, "robot_sensor_frame"))
         rospy.set_param(
             os.path.join(self.namespace, "move_base", "global_costmap", "robot_base_frame"),
-            (self.namespace).replace("/", "") + "_base_footprint"
+            self.namespace.replace("/", "") + "/" + base_frame
         )
         rospy.set_param(
             os.path.join(self.namespace, "move_base", "local_costmap", "robot_base_frame"),
-            (self.namespace).replace("/", "") + "_base_footprint"
+            self.namespace.replace("/", "") + "/" + base_frame
         )
         rospy.set_param(
             os.path.join(self.namespace, "move_base", "local_costmap", "scan", "sensor_frame"),
-            (self.namespace).replace("/", "") + "_laser_link"
+            self.namespace.replace("/", "") + "/" + sensor_frame
         )
         rospy.set_param(
             os.path.join(self.namespace, "move_base", "global_costmap", "scan", "sensor_frame"),
-            (self.namespace).replace("/", "") + "_laser_link"
+            self.namespace.replace("/", "") + "/" + base_frame
         )
 
     def robot_pos_callback(self, data):
         current_position = data.pose.pose.position
 
-        self.set_is_goal_goached(
-            [current_position.x, current_position.y],
+        self.position = [current_position.x, current_position.y]
+
+        self.set_is_goal_reached(
+            self.position,
             self.goal_pos
         )
 
-    def set_is_goal_goached(self, start, goal):
+    def set_is_goal_reached(self, start, goal):
         distance_to_goal = math.sqrt(
             (start[0] - goal[0]) ** 2
             + (start[1] - goal[1]) ** 2 

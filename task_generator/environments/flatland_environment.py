@@ -56,18 +56,14 @@ class FlatlandEnvironment(BaseEnvironment):
         self._namespace = namespace
         self._ns_prefix = "" if namespace == "" else "/" + namespace + "/"
 
-        self._goal_pub = rospy.Publisher(
-            f"{self._ns_prefix}goal", PoseStamped, queue_size=1, latch=True
-        )
-
         self._move_robot_pub = rospy.Publisher(
             self._ns_prefix + "move_model", MoveModelMsg, queue_size=10
         )
 
-        self._robot_name = rospy.get_param("robot_model")
-        self._robot_radius = rospy.get_param("robot_radius")
-        self._is_training_mode = rospy.get_param("train_mode")
-        self._step_size = rospy.get_param("step_size")
+        self._robot_name = rospy.get_param("robot_model", "")
+        self._robot_radius = rospy.get_param("robot_radius", "")
+        self._is_training_mode = rospy.get_param("train_mode", "")
+        self._step_size = rospy.get_param("step_size", "")
         # self._robot_yaml_path = rospy.get_param("robot_yaml_path")
         self._tmp_model_path = rospy.get_param("tmp_model_path", "/tmp")
 
@@ -165,7 +161,7 @@ class FlatlandEnvironment(BaseEnvironment):
 
         self._obstacles_amount += 1 
 
-    def spawn_robot(self, name, robot_name, namespace_appendix=None):
+    def spawn_robot(self, name, robot_name, namespace_appendix=None, complexity=1):
         base_model_path = os.path.join(
             rospkg.RosPack().get_path("arena-simulation-setup"),
             "robot",
@@ -203,21 +199,6 @@ class FlatlandEnvironment(BaseEnvironment):
             srv = self._spawn_model_srv
 
         srv(request)
-
-    def publish_goal(self, goal):
-        goal_msg = PoseStamped()
-        goal_msg.header.seq = 0
-        goal_msg.header.stamp = rospy.get_rostime()
-        goal_msg.header.frame_id = "map"
-        goal_msg.pose.position.x = goal[0]
-        goal_msg.pose.position.y = goal[1]
-
-        goal_msg.pose.orientation.w = 0
-        goal_msg.pose.orientation.x = 0
-        goal_msg.pose.orientation.y = 0
-        goal_msg.pose.orientation.z = 1
-
-        self._goal_pub.publish(goal_msg)
 
     def move_robot(self, pos, name=None):
         pose = Pose2D()
@@ -350,10 +331,10 @@ class FlatlandEnvironment(BaseEnvironment):
         with open(yaml_path, "r") as file:
             return yaml.safe_load(file)
 
-    @abstractmethod
+    @staticmethod
     def create_obs_name(number):
         return "obs_" + str(number)
 
-    @abstractmethod
+    @staticmethod
     def check_yaml_path(path):
         return os.path.isfile(path)

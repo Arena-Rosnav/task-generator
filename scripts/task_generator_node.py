@@ -59,16 +59,16 @@ class TaskGenerator:
 
         self.number_of_resets = 0
 
-        self.reset_task()
+        self.reset_task(move_robot=False)
+
         ## Timers
         rospy.Timer(rospy.Duration(0.5), self.check_task_status)
 
-
     def check_task_status(self, _):
         if self.task.is_done():
-            self.reset_task()
+            self.reset_task(move_robot=False)
 
-    def reset_task(self):
+    def reset_task(self, move_robot=True):
         self.start_time = rospy.get_time()
 
         rospy.loginfo("=============")
@@ -77,7 +77,7 @@ class TaskGenerator:
 
         self.env_wrapper.before_reset_task()
 
-        is_end = self.task.reset()
+        is_end = self.task.reset(move_robot=move_robot)
 
         self.pub_scenario_reset.publish(self.number_of_resets)
         self._send_end_message_on_end(is_end)
