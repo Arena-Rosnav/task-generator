@@ -66,7 +66,7 @@ class StagedRandomTask(RandomTask):
 
         self._curr_stage = self._curr_stage + 1
 
-        return self._init_stage_and_update_hyperparams(self._curr_stage)
+        return self._init_stage_and_update_config(self._curr_stage)
 
     def previous_stage(self, _):
         if self._curr_stage <= 1:
@@ -77,9 +77,9 @@ class StagedRandomTask(RandomTask):
 
         self._curr_stage = self._curr_stage - 1
 
-        return self._init_stage_and_update_hyperparams(self._curr_stage)
+        return self._init_stage_and_update_config(self._curr_stage)
 
-    def _init_stage_and_update_hyperparams(self, stage):
+    def _init_stage_and_update_config(self, stage):
         self._init_stage(stage)
 
         if self.namespace != "eval_sim":
@@ -88,7 +88,7 @@ class StagedRandomTask(RandomTask):
         rospy.set_param("/curr_stage", stage)
         rospy.set_param("/last_state_reached", stage == len(self._stages))
 
-        self._update_stage_in_hyperparams(stage)
+        self._update_stage_in_config(stage)
 
         return stage
 
@@ -96,32 +96,32 @@ class StagedRandomTask(RandomTask):
         if self._debug_mode:
             return
 
-        self._hyperparams_file_path = paths["config"]
-        self._hyperparams_lock = FileLock(f"{self._hyperparams_file_path}.lock")
+        self._config_file_path = paths["config"]
+        self._config_lock = FileLock(f"{self._config_file_path}.lock")
 
         assert os.path.isfile(
-            self._hyperparams_file_path
-        ), f"Found no 'training_config.yaml' at {self._hyperparams_file_path}"
+            self._config_file_path
+        ), f"Found no 'training_config.yaml' at {self._config_file_path}"
 
-    def _update_stage_in_hyperparams(self, stage):
+    def _update_stage_in_config(self, stage):
         """
-        The current stage is stored inside the hyperparams
+        The current stage is stored inside the config
         file for when the training is stopped and later
         continued, the correct stage can be restored.
         """
         if self._debug_mode:
             return
 
-        self._hyperparams_lock.acquire()
+        self._config_lock.acquire()
 
-        with open(self._hyperparams_file_path, "r", encoding="utf-8") as target:
-            hyperparams = yaml.load(target, Loader=yaml.FullLoader)
-            hyperparams["callbacks"]["training_curriculum"]["curr_stage"] = stage
+        with open(self._config_file_path, "r", encoding="utf-8") as target:
+            config = yaml.load(target, Loader=yaml.FullLoader)
+            config["callbacks"]["training_curriculum"]["curr_stage"] = stage
 
-        with open(self._hyperparams_file_path, "w", encoding="utf-8") as target:
-            yaml.dump(hyperparams, target, ensure_ascii=False, indent=4)
+        with open(self._config_file_path, "w", encoding="utf-8") as target:
+            yaml.dump(config, target, ensure_ascii=False, indent=4)
 
-        self._hyperparams_lock.release()
+        self._config_lock.release()
 
     def reset(self):
         super().reset(
