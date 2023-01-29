@@ -63,7 +63,7 @@ class BaseEnvironment:
         """
         raise NotImplementedError()
 
-    def spawn_robot(self):
+    def spawn_robot(self, complexity=1):
         """
         Spawn a robot in the environment.
         A position is not specified because the robot is moved at the 

@@ -5,8 +5,8 @@ class Constants:
     MAX_RESET_FAIL_TIMES = 3
 
     class ObstacleManager:
-        DYNAMIC_OBSTACLES = 15
-        STATIC_OBSTACLES = 20
+        DYNAMIC_OBSTACLES = 0
+        STATIC_OBSTACLES = 0
 
         OBSTACLE_MAX_RADIUS = 0.6
 

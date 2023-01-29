@@ -161,7 +161,7 @@ class FlatlandEnvironment(BaseEnvironment):
 
         self._obstacles_amount += 1 
 
-    def spawn_robot(self, name, robot_name, namespace_appendix=None):
+    def spawn_robot(self, name, robot_name, namespace_appendix=None, complexity=1):
         base_model_path = os.path.join(
             rospkg.RosPack().get_path("arena-simulation-setup"),
             "robot",
@@ -331,10 +331,10 @@ class FlatlandEnvironment(BaseEnvironment):
         with open(yaml_path, "r") as file:
             return yaml.safe_load(file)
 
-    @abstractmethod
+    @staticmethod
     def create_obs_name(number):
         return "obs_" + str(number)
 
-    @abstractmethod
+    @staticmethod
     def check_yaml_path(path):
         return os.path.isfile(path)
