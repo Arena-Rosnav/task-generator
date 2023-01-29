@@ -59,23 +59,27 @@ class StagedRandomTask(RandomTask):
 
     def next_stage(self, _):
         if self._curr_stage >= len(self._stages):
-            rospy.loginfo(f"({self.namespace}) INFO: Tried to trigger next stage but already reached last one")
+            rospy.loginfo(
+                f"({self.namespace}) INFO: Tried to trigger next stage but already reached last one"
+            )
             return
 
         self._curr_stage = self._curr_stage + 1
 
-        return self._init_stage_and_update_hyperparams(self._curr_stage)
+        return self._init_stage_and_update_config(self._curr_stage)
 
     def previous_stage(self, _):
         if self._curr_stage <= 1:
-            rospy.loginfo(f"({self.namespace}) INFO: Tried to trigger previous stage but already reached first one")
+            rospy.loginfo(
+                f"({self.namespace}) INFO: Tried to trigger previous stage but already reached first one"
+            )
             return
 
         self._curr_stage = self._curr_stage - 1
 
-        return self._init_stage_and_update_hyperparams(self._curr_stage)
+        return self._init_stage_and_update_config(self._curr_stage)
 
-    def _init_stage_and_update_hyperparams(self, stage):
+    def _init_stage_and_update_config(self, stage):
         self._init_stage(stage)
 
         if self.namespace != "eval_sim":
@@ -84,7 +88,7 @@ class StagedRandomTask(RandomTask):
         rospy.set_param("/curr_stage", stage)
         rospy.set_param("/last_state_reached", stage == len(self._stages))
 
-        self._update_stage_in_hyperparams(stage)
+        self._update_stage_in_config(stage)
 
         return stage
 
@@ -92,37 +96,32 @@ class StagedRandomTask(RandomTask):
         if self._debug_mode:
             return
 
-        self._hyperparams_file_path = os.path.join(
-            paths.get("model"), "hyperparameters.json"
-        )
-        self._hyperparams_lock = FileLock(f"{self._hyperparams_file_path}.lock")
+        self._config_file_path = paths["config"]
+        self._config_lock = FileLock(f"{self._config_file_path}.lock")
 
         assert os.path.isfile(
-            self._hyperparams_file_path
-        ), f"Found no 'hyperparameters.json' at {self._hyperparams_file_path}"
+            self._config_file_path
+        ), f"Found no 'training_config.yaml' at {self._config_file_path}"
 
-    def _update_stage_in_hyperparams(self, stage):
+    def _update_stage_in_config(self, stage):
         """
-        The current stage is stored inside the hyperparams
+        The current stage is stored inside the config
         file for when the training is stopped and later
         continued, the correct stage can be restored.
         """
         if self._debug_mode:
             return
 
-        self._hyperparams_lock.acquire()
+        self._config_lock.acquire()
 
-        file = open(self._hyperparams_file_path, "r")
+        with open(self._config_file_path, "r", encoding="utf-8") as target:
+            config = yaml.load(target, Loader=yaml.FullLoader)
+            config["callbacks"]["training_curriculum"]["curr_stage"] = stage
 
-        hyperparams = json.load(file)
-        hyperparams["curr_stage"] = stage
+        with open(self._config_file_path, "w", encoding="utf-8") as target:
+            yaml.dump(config, target, ensure_ascii=False, indent=4)
 
-        with open(self._hyperparams_file_path, "w", encoding="utf-8") as target:
-            json.dump(hyperparams, target, ensure_ascii=False, indent=4)
-
-        file.close()
-
-        self._hyperparams_lock.release()
+        self._config_lock.release()
 
     def reset(self):
         super().reset(
@@ -131,14 +130,14 @@ class StagedRandomTask(RandomTask):
         )
 
     def _reset_robot_and_obstacles(
-            self, static_obstacles=None, dynamic_obstacles=None, **kwargs
-        ):
+        self, static_obstacles=None, dynamic_obstacles=None, **kwargs
+    ):
         super()._reset_robot_and_obstacles(
-            static_obstacles=static_obstacles, 
+            static_obstacles=static_obstacles,
             dynamic_obstacles=dynamic_obstacles,
-            **kwargs
+            **kwargs,
         )
-    
+
     def _init_stage(self, stage):
         static_obstacles = self._stages[stage]["static"]
         dynamic_obstacles = self._stages[stage]["dynamic"]
