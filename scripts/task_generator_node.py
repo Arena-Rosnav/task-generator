@@ -46,6 +46,7 @@ class TaskGenerator:
         self.task.set_robot_names_param()
 
         self.number_of_resets = 0
+        self.desired_resets = rospy.get_param("desired_resets", 2)
 
         self.srv_start_model_visualization = rospy.ServiceProxy("start_model_visualization", Empty)
         self.srv_start_model_visualization(EmptyRequest())
@@ -59,30 +60,30 @@ class TaskGenerator:
 
         self.number_of_resets = 0
 
-        self.reset_task(move_robot=False)
+        self.reset_task()
 
         ## Timers
         rospy.Timer(rospy.Duration(0.5), self.check_task_status)
 
     def check_task_status(self, _):
         if self.task.is_done():
-            self.reset_task(move_robot=False)
+            self.reset_task()
 
-    def reset_task(self, move_robot=True):
+    def reset_task(self):
         self.start_time = rospy.get_time()
-
-        rospy.loginfo("=============")
-        rospy.loginfo("Task Reseted!")
-        rospy.loginfo("=============")
 
         self.env_wrapper.before_reset_task()
 
-        is_end = self.task.reset(move_robot=move_robot)
+        is_end = self.task.reset()
 
         self.pub_scenario_reset.publish(self.number_of_resets)
         self._send_end_message_on_end(is_end)
 
         self.env_wrapper.after_reset_task()
+
+        rospy.loginfo("=============")
+        rospy.loginfo("Task Reseted!")
+        rospy.loginfo("=============")
 
         self.number_of_resets += 1
 
@@ -94,12 +95,20 @@ class TaskGenerator:
         return EmptyResponse()
 
     def _send_end_message_on_end(self, is_end):
-        if not is_end or self.task_mode != TaskMode.SCENARIO:
+        if (
+            (not is_end and self.task_mode == TaskMode.SCENARIO) 
+            or (self.task_mode != TaskMode.SCENARIO and self.number_of_resets < self.desired_resets)
+        ):
             return
 
         rospy.loginfo("Shutting down. All tasks completed")
 
-        self.pub_scenario_finished.publish(Bool(True))
+        # Send this message 10 times to make sure it is received
+        for _ in range(10):
+            self.pub_scenario_finished.publish(Bool(True))
+
+            rospy.sleep(0.1)
+
         rospy.signal_shutdown("Finished all episodes of the current scenario")
 
 
