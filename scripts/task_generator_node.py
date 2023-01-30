@@ -48,18 +48,18 @@ class TaskGenerator:
         self.number_of_resets = 0
         self.desired_resets = rospy.get_param("desired_resets", 2)
 
-        try:
-            self.srv_start_model_visualization = rospy.ServiceProxy("start_model_visualization", Empty)
-            self.srv_start_model_visualization(EmptyRequest())
-        except:
-            pass
+        self.srv_start_model_visualization = rospy.ServiceProxy("start_model_visualization", Empty)
+        self.srv_start_model_visualization(EmptyRequest())
 
         self.reset_task()
 
         rospy.sleep(2)
 
-        self.srv_setup_finished = rospy.ServiceProxy("task_generator_setup_finished", Empty)
-        self.srv_setup_finished(EmptyRequest())
+        try:
+            self.srv_setup_finished = rospy.ServiceProxy("task_generator_setup_finished", Empty)
+            self.srv_setup_finished(EmptyRequest())
+        except:
+            pass
 
         self.number_of_resets = 0
 
